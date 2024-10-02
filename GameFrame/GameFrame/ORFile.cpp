@@ -1,5 +1,29 @@
 #include "ORFile.h"
 
+
+bool ORReadStraw::ReadLabel(std::string& Str)
+{
+    char c{ '\0' };
+    Str.clear();
+    for (;;)
+    {
+        Read(c); if (!c)break;
+        Str.push_back(c);
+    }
+}
+int ORReadStraw::ReadVector(std::vector<std::string>& Data)
+{
+    int64_t Size;
+    if (!Read(Size))return 0;
+    Data.resize((size_t)Size);
+    int Ret = 0;
+    for (auto& d : Data)
+    {
+        if (!Read(d)) break;
+        else ++Ret;
+    }
+    return Ret;
+}
 ORReadStraw::~ORReadStraw()
 {
     Unlink();

@@ -10,61 +10,23 @@ template <typename T>
 inline ImGuiID GetIDByObject(const T* This) { return reinterpret_cast<ImGuiID>(This); }
 #define ThisImGuiID (GetIDByObject(this))
 
-struct HintedName
+class ORDrawable
 {
-    _UTF8 std::string Name, Desc, Hint;
-
-};
-
-template<typename T>
-class ORResourcePool
-{
-private:
-    std::unordered_map<std::string, std::shared_ptr<T>> Pool;
 public:
-    bool Insert(const std::string_view Name, bool Replace, T* pResource)
-    {
-        auto it = Pool.find(std::string(Name));
-        if (it != Pool.end())
-        {
-            if (!Replace)return false;
-            else Pool.erase(Name);
-        }
-        return Pool.insert({ Name, std::shared_ptr<T>(pResource) }).second;
-    }
-    template<typename... TArgs>
-    bool Emplace(const std::string_view Name, bool Replace, TArgs&&... Args)
-    {
-        auto it = Pool.find(std::string(Name));
-        if (it != Pool.end())
-        {
-            if (!Replace)return false;
-            else Pool.erase(std::string(Name));
-        }
-        return Pool.insert({ std::string(Name), std::make_shared<T>(std::forward<TArgs>(Args)...)}).second;
-    }
-    std::shared_ptr<T> GetResource(const std::string_view Name)
-    {
-        auto it = Pool.find(std::string(Name));
-        if (it != Pool.end())return it->second;
-        else return nullptr;
-    }
-    std::shared_ptr<T> GetResource(const std::string_view Name, const std::shared_ptr<T>& Default)
-    {
-        auto it = Pool.find(std::string(Name));
-        if (it != Pool.end())return it->second;
-        else return Default;
-    }
+    virtual ~ORDrawable() = default;
+    virtual void DrawUI() = 0;//统一不带窗口创建
+
+    ORDrawable() = default;
+    ORDrawable(const ORDrawable&) = default;
+    ORDrawable(ORDrawable&&) = default;
 };
 
-class ORComponent
+class ORComponent : public ORDrawable
 {
 public:
     std::shared_ptr<ORImage> BackGround;
 
-    virtual ~ORComponent() {}
-    virtual void DrawUI() = 0;//统一不带窗口创建
-
+    virtual ~ORComponent() = default;
     ORComponent() = default;
     ORComponent(const ORComponent&) = delete;
     ORComponent(ORComponent&&) = delete;
@@ -76,11 +38,9 @@ public:
     ImVec2 Position;
     ImVec2 Size;
 
-    virtual ~ORComponentFrame() {}
-    virtual void DrawUI() = 0;
-
     void Resize(ImVec2 Position, ImVec2 Size);
     inline void FitBackGroundSize() { if (BackGround)Size = BackGround->GetSize(); }
+    virtual ~ORComponentFrame() = default;
     ORComponentFrame(ImVec2 Position, ImVec2 Size);
     ORComponentFrame() = default;
     ORComponentFrame(const ORComponentFrame&) = delete;
@@ -170,4 +130,108 @@ public:
     const std::string& GetHint() const;
     bool LoadHintFile(ORStaticStraw& Source);
     bool LoadHintFile(const std::string_view FileName);
+};
+
+typedef std::function<void()> StdMessage;
+
+struct ORPopUp : public ORComponentFrame
+{
+
+    bool CanClose{ false };//Only when Modal==true
+    bool Modal{ false };
+    _UTF8 std::string Title{ "" };
+    ImGuiWindowFlags Flag{ ImGuiWindowFlags_None };
+    StdMessage Show{ []() {} };
+    StdMessage Close{ []() {} };//run when it can be closed and it is closed
+
+    virtual ~ORPopUp();
+    virtual void DrawUI();
+    ORPopUp& operator=(const ORPopUp&) = default;
+
+    ORPopUp& Create(const _UTF8 std::string& title);
+    ORPopUp& CreateModal(const _UTF8 std::string& title, bool canclose, StdMessage close = []() {});
+    ORPopUp& SetTitle(const _UTF8 std::string& title);
+    ORPopUp& SetFlag(ImGuiWindowFlags flag);
+    ORPopUp& UnsetFlag(ImGuiWindowFlags flag);
+    ORPopUp& ClearFlag();
+    ORPopUp& SetSize(ImVec2 NewSize = { 0,0 });//{0,0}=default/auto
+    ORPopUp& PushTextPrev(const _UTF8 std::string& Text);
+    ORPopUp& PushTextBack(const _UTF8 std::string& Text);
+    ORPopUp& PushMsgPrev(StdMessage Msg);
+    ORPopUp& PushMsgBack(StdMessage Msg);
+
+    ORPopUp() = default;
+    ORPopUp(const ORPopUp&) = delete;
+    ORPopUp(ORPopUp&&) = delete;
+};
+
+class ORPopUpManager : public ORDrawable
+{
+private:
+    std::unique_ptr<ORPopUp> CurrentPopup;
+    bool HasPopup;
+public:
+    static std::unique_ptr<ORPopUp> SingleText(const _UTF8 std::string& StrId, const _UTF8 std::string& Text, bool Modal);
+    static std::unique_ptr<ORPopUp> BasicPopUp();
+
+    inline void SetCurrentPopup(std::unique_ptr<ORPopUp>&& sc) { HasPopup = true; CurrentPopup = std::move(sc); }
+    inline void ClearCurrentPopup() { HasPopup = false; }
+
+    virtual ~ORPopUpManager() = default;
+    virtual void DrawUI();
+};
+
+template<typename Cont>
+class ORListMenu : public ORComponent
+{
+    std::vector<Cont>& List;
+    int Page{ 0 };
+    int KeyPerPage{ 10 };
+public:
+    typedef Cont Type;
+    typedef std::function<void(Cont&, int, int)> ActionType;
+    std::string Tag;
+    ActionType Action;
+
+    ORListMenu() = delete;
+    ORListMenu(std::vector<Cont>& L, const std::string& t, const ActionType& a, int _KeyPerPage) :
+        List(L), Page(0), Tag(t), Action(a), KeyPerPage(_KeyPerPage) {}
+    inline int& PageLength() { return KeyPerPage; }
+    inline int PageLength() const { return KeyPerPage; }
+
+
+    virtual ~ORListMenu() = default;
+    virtual void DrawUI();
+};
+
+class ORUndoStack
+{
+public:
+    struct _Item
+    {
+        std::string Id;
+        std::function<void()> UndoAction, RedoAction;
+        std::function<std::any()> Extra;
+    };
+private:
+    std::vector<_Item> Stack;
+    int Cursor{ -1 };
+public:
+    bool Undo();
+    bool Redo();
+    bool CanUndo() const;
+    bool CanRedo() const;
+    void Release();
+    void Push(const _Item& a);
+    void Clear();
+    _Item* Top();
+};
+
+class ORWorkSpace
+{
+public:
+    ORTopBar TopBar;
+    ORHintManager BottomBar;
+    ORPopUpManager PopUpManager;
+    ORUndoStack UndoStack;
 };

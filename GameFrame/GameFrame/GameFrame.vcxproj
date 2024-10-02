@@ -152,10 +152,12 @@
     <ClInclude Include="ExtJson.h" />
     <ClInclude Include="FromEngine\global_tool_func.h" />
     <ClInclude Include="FromEngine\Include.h" />
+    <ClInclude Include="Global.h" />
     <ClInclude Include="Include.h" />
     <ClInclude Include="MainStage.h" />
     <ClInclude Include="Minimal.h" />
     <ClInclude Include="MusicMCI.h" />
+    <ClInclude Include="ORBackType.h" />
     <ClInclude Include="ORComponent.h" />
     <ClInclude Include="ORException.h" />
     <ClInclude Include="ORFile.h" />
@@ -181,7 +183,9 @@
     <ClCompile Include="FromEngine\global_tool_func.cpp" />
     <ClCompile Include="FromEngine\ini.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Global.cpp" />
     <ClCompile Include="MusicMCI.cpp" />
+    <ClCompile Include="ORBackType.cpp" />
     <ClCompile Include="ORComponent.cpp" />
     <ClCompile Include="ORException.cpp" />
     <ClCompile Include="ORFile.cpp" />

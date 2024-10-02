@@ -78,6 +78,12 @@
     <ClInclude Include="ExtJson.h">
       <Filter>Json</Filter>
     </ClInclude>
+    <ClInclude Include="ORBackType.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.h">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\imgui.cpp">
@@ -139,6 +145,12 @@
     </ClCompile>
     <ClCompile Include="ExtJson.cpp">
       <Filter>Json</Filter>
+    </ClCompile>
+    <ClCompile Include="ORBackType.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.cpp">
+      <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

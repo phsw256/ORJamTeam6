@@ -1,6 +1,6 @@
 #include"global_tool_func.h"
 #include <Windows.h>
- 
+#include <regex>
 
 hash_t StrHash(const std::string& __Str)
 {
@@ -101,4 +101,46 @@ uint64_t GetSysTimeMicros()
     // 从1970年1月1日0:0:0:000到现在的微秒数(UTC时间)
     tt = (li.QuadPart - EpochFIleTime) / 10;
     return tt;
+}
+
+
+bool RegexFull_Nothrow(const std::string& Str, const std::string& Regex) throw()
+{
+    try { return std::regex_match(Str, std::regex(Regex)); }
+    catch (std::exception& e) { (void)e; return false; }
+}
+bool RegexFull_Throw(const std::string& Str, const std::string& Regex)
+{
+    try { return std::regex_match(Str, std::regex(Regex)); }
+    catch (std::exception& e) { throw(e); }
+}
+bool RegexNone_Nothrow(const std::string& Str, const std::string& Regex) throw()
+{
+    try { return !std::regex_search(Str, std::regex(Regex)); }
+    catch (std::exception& e) { (void)e; return false; }
+}
+bool RegexNone_Throw(const std::string& Str, const std::string& Regex)
+{
+    try { return !std::regex_search(Str, std::regex(Regex)); }
+    catch (std::exception& e) { throw(e); }
+}
+bool RegexNotFull_Nothrow(const std::string& Str, const std::string& Regex) throw()
+{
+    try { return !std::regex_match(Str, std::regex(Regex)); }
+    catch (std::exception& e) { (void)e; return false; }
+}
+bool RegexNotFull_Throw(const std::string& Str, const std::string& Regex)
+{
+    try { return !std::regex_match(Str, std::regex(Regex)); }
+    catch (std::exception& e) { throw(e); }
+}
+bool RegexNotNone_Nothrow(const std::string& Str, const std::string& Regex) throw()
+{
+    try { return std::regex_search(Str, std::regex(Regex)); }
+    catch (std::exception& e) { (void)e; return false; }
+}
+bool RegexNotNone_Throw(const std::string& Str, const std::string& Regex)
+{
+    try { return std::regex_search(Str, std::regex(Regex)); }
+    catch (std::exception& e) { throw(e); }
 }

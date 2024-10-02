@@ -13,7 +13,9 @@ C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\FromEngine\external_log.cpp;C:\WORK\PROJ
 C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\FromEngine\global_tool_func.cpp;C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\Release\global_tool_func.obj
 C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\FromEngine\ini.cpp;C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\Release\ini.obj
 C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\Game.cpp;C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\Release\Game.obj
+C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\Global.cpp;C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\Release\Global.obj
 C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\MusicMCI.cpp;C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\Release\MusicMCI.obj
+C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\ORBackType.cpp;C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\Release\ORBackType.obj
 C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\ORComponent.cpp;C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\Release\ORComponent.obj
 C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\ORException.cpp;C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\Release\ORException.obj
 C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\ORFile.cpp;C:\WORK\PROJ\SWITCH\GameFrame\GameFrame\Release\ORFile.obj

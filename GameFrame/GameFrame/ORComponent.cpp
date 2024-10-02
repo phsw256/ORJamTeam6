@@ -2,6 +2,7 @@
 #include "ORFile.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
+#include "Global.h"
 
 ImVec2 WindowRelPos(ImVec2 Rel)
 {
@@ -190,4 +191,294 @@ void ORHintManager::SetHintCustom(const std::function<bool(_UTF8 std::string&)>&
 const std::string& ORHintManager::GetHint() const
 {
     return HasSet ? CustomHint : Hint[UseHint];
+}
+
+ORPopUp& ORPopUp::Create(const _UTF8 std::string& title)
+{
+    Title = title;
+    CanClose = false;
+    Show = []() {};
+    Flag = ImGuiWindowFlags_AlwaysAutoResize;
+    return *this;
+}
+ORPopUp& ORPopUp::CreateModal(const _UTF8 std::string& title, bool canclose, StdMessage close)
+{
+    Title = title;
+    Modal = true;
+    CanClose = canclose;
+    Close = close;
+    Show = []() {};
+    Flag = ImGuiWindowFlags_AlwaysAutoResize;
+    return *this;
+}
+ORPopUp& ORPopUp::SetTitle(const _UTF8 std::string& title)
+{
+    Title = title;
+    return *this;
+}
+ORPopUp& ORPopUp::SetFlag(ImGuiWindowFlags flag)
+{
+    Flag |= flag;
+    return *this;
+}
+ORPopUp& ORPopUp::UnsetFlag(ImGuiWindowFlags flag)
+{
+    Flag &= ~flag;
+    return *this;
+}
+ORPopUp& ORPopUp::ClearFlag()
+{
+    Flag = 0;
+    return *this;
+}
+ORPopUp& ORPopUp::PushTextPrev(const _UTF8 std::string& Text)//TODO:优化，试图砍掉prev
+{
+    StdMessage ShowPrev{ std::move(Show) };
+    Show = [=]() {ImGui::TextWrapped(Text.c_str()); ShowPrev(); };
+    return *this;
+}
+ORPopUp& ORPopUp::PushTextBack(const _UTF8 std::string& Text)
+{
+    StdMessage ShowPrev{ std::move(Show) };
+    Show = [=]() {ShowPrev(); ImGui::TextWrapped(Text.c_str()); };
+    return *this;
+}
+ORPopUp& ORPopUp::PushMsgPrev(StdMessage Msg)
+{
+    StdMessage ShowPrev{ std::move(Show) };
+    Show = [=]() {Msg(); ShowPrev(); };
+    return *this;
+}
+ORPopUp& ORPopUp::PushMsgBack(StdMessage Msg)
+{
+    StdMessage ShowPrev{ std::move(Show) };
+    Show = [=]() {ShowPrev(); Msg(); };
+    return *this;
+}
+ORPopUp& ORPopUp::SetSize(ImVec2 NewSize)
+{
+    Size = NewSize;
+    return *this;
+}
+
+
+ORPopUp::~ORPopUp()
+{
+    Close();
+}
+void ORPopUp::DrawUI()
+{
+    Show();
+}
+
+std::unique_ptr<ORPopUp> ORPopUpManager::BasicPopUp()
+{
+    return std::move(std::make_unique<ORPopUp>());
+}
+
+std::unique_ptr<ORPopUp> ORPopUpManager::SingleText(const _UTF8 std::string& StrId, const _UTF8 std::string& Text, bool Modal)
+{
+    auto pPopUp = std::make_unique<ORPopUp>();
+    if (Modal)pPopUp->CreateModal(StrId, false);
+    else pPopUp->Create(StrId).SetFlag(ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize).PushTextBack(Text);
+    return std::move(pPopUp);
+}
+
+void ORPopUpManager::DrawUI()
+{
+    if (HasPopup && CurrentPopup)
+    {
+        ImGui::OpenPopup(CurrentPopup->Title.c_str());
+        bool HPPrev = HasPopup;
+        if (CurrentPopup->Size.x >= 1.0F && CurrentPopup->Size.y >= 1.0F)ImGui::SetNextWindowSize(CurrentPopup->Size);
+        ImGui::SetNextWindowPos(CurrentPopup->Position);
+        if (CurrentPopup->Modal)
+        {
+            if (ImGui::BeginPopupModal(CurrentPopup->Title.c_str(), CurrentPopup->CanClose ? (&HasPopup) : nullptr), CurrentPopup->Flag)
+            {
+                CurrentPopup->DrawUI();
+                ImGui::EndPopup();
+            }
+        }
+        else
+        {
+            if (ImGui::BeginPopup(CurrentPopup->Title.c_str(), CurrentPopup->Flag))
+            {
+                CurrentPopup->DrawUI();
+                ImGui::EndPopup();
+            }
+        }
+        if (CurrentPopup->CanClose && HPPrev && (!HasPopup)) CurrentPopup.reset();
+        ImGui::CloseCurrentPopup();
+    }
+}
+
+template<typename Cont>
+void Browse_ShowList(const std::string& suffix, std::vector<Cont>& Ser, int* Page, const std::function<void(Cont&, int, int)>& Callback, int KeyPerPage)
+{
+    int RenderF = (*Page) * KeyPerPage;
+    int RenderN = (1 + (*Page)) * KeyPerPage;
+    int Sz = Ser.size();
+    bool HasPrev = ((*Page) != 0);
+    bool HasNext = (RenderN < Sz);
+    int RealRF = std::max(RenderF, 0);
+    int RealNF = std::min(RenderN, Sz);
+    int PageN = GetPage(Sz);
+    for (int On = RealRF; On < RealNF; On++)
+    {
+        Callback(Ser.at(On), On - RealRF + 1, On);
+    }
+    if (HasPrev || HasNext)
+    {
+        if (HasPrev)
+        {
+            if (ImGui::ArrowButton(("prev_" + suffix).c_str(), ImGuiDir_Left))
+            {
+                (*Page)--;
+                if (EnableLog)
+                {
+                    GlobalLog.AddLog_CurTime(false);
+                    GlobalLog.AddLog(("点击了上一页（" + suffix + "）按钮。").c_str());
+                }
+            }
+            ImGui::SameLine();
+            ImGui::Text(u8"上一页");
+            ImGui::SameLine();
+        }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, { 0,0,0,0 });
+            ImGui::PushStyleColor(ImGuiCol_Button, { 0,0,0,0 });
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0,0,0,0 });
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0,0,0,0 });
+            ImGui::ArrowButton(("prev_" + suffix).c_str(), ImGuiDir_Left);
+            ImGui::SameLine();
+            ImGui::PopStyleColor(4);
+        }
+        if ((*Page) + 1 >= 1000)ImGui::SetCursorPosX(FontHeight * 13.0f);
+        if ((*Page) + 1 >= 100)ImGui::SetCursorPosX(FontHeight * 12.5f);
+        else ImGui::SetCursorPosX(FontHeight * 12.0f);
+        if (HasNext)
+        {
+            ImGui::Text(u8"下一页");
+            ImGui::SameLine();
+            if (ImGui::ArrowButton(("next_" + suffix).c_str(), ImGuiDir_Right))
+            {
+                (*Page)++;
+                if (EnableLog)
+                {
+                    GlobalLog.AddLog_CurTime(false);
+                    GlobalLog.AddLog(("点击了下一页（" + suffix + "）按钮。").c_str());
+                }
+            }
+            ImGui::SameLine();
+
+        }
+        ImGui::NewLine();
+
+        if (*Page != 0)
+        {
+            if (ImGui::ArrowButton(("fpg_" + suffix).c_str(), ImGuiDir_Left))
+            {
+                (*Page) = 0;
+                if (EnableLog)
+                {
+                    GlobalLog.AddLog_CurTime(false);
+                    GlobalLog.AddLog(("点击了第一页（" + suffix + "）按钮。").c_str());
+                }
+            }
+            ImGui::SameLine();
+            ImGui::Text(u8"第一页");
+            ImGui::SameLine();
+        }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, { 0,0,0,0 });
+            ImGui::PushStyleColor(ImGuiCol_Button, { 0,0,0,0 });
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0,0,0,0 });
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0,0,0,0 });
+            ImGui::ArrowButton("OBSOLETE_BUTTON", ImGuiDir_Left);
+            ImGui::SameLine();
+            ImGui::PopStyleColor(4);
+        }
+        if ((*Page) + 1 >= 1000)ImGui::SetCursorPosX(FontHeight * 5.5f);
+        else ImGui::SetCursorPosX(FontHeight * 6.0f);
+        auto PosYText = ImGui::GetCursorPosY();
+        ImGui::SetCursorPosY(PosYText - FontHeight * 0.5f);
+        ImGui::Text(u8"第（%d/%d）页", (*Page) + 1, PageN);
+        ImGui::SetCursorPosY(PosYText);
+        ImGui::SameLine();
+        if ((*Page) + 1 >= 1000)ImGui::SetCursorPosX(FontHeight * 13.0f);
+        if ((*Page) + 1 >= 100)ImGui::SetCursorPosX(FontHeight * 12.5f);
+        else ImGui::SetCursorPosX(FontHeight * 12.0f);
+        if ((*Page) + 1 != PageN)
+        {
+            ImGui::Text(u8"最后页");
+            ImGui::SameLine();
+            if (ImGui::ArrowButton(("lpg_" + suffix).c_str(), ImGuiDir_Right))
+            {
+                (*Page) = PageN - 1;
+                if (EnableLog)
+                {
+                    GlobalLog.AddLog_CurTime(false);
+                    GlobalLog.AddLog(("点击了最后页（" + suffix + "）按钮。").c_str());
+                }
+            }
+            ImGui::SameLine();
+        }
+        ImGui::NewLine();
+    }
+}
+
+template<typename Cont>
+void ORListMenu<Cont>::DrawUI()
+{
+    Browse_ShowList(Tag, List, &Page, Action, KeyPerPage);
+}
+
+
+bool ORUndoStack::Undo()
+{
+    if (Cursor == -1)return false;
+    Stack[Cursor].UndoAction();
+    --Cursor;
+    //IBF_Inst_Project.Project.ChangeAfterSave = true;
+    return true;
+}
+bool ORUndoStack::Redo()
+{
+    if (Cursor == (int)Stack.size() - 1)return false;
+    ++Cursor;
+    Stack[Cursor].RedoAction();
+    //IBF_Inst_Project.Project.ChangeAfterSave = true;
+    return true;
+}
+bool ORUndoStack::CanUndo() const
+{
+    return Cursor > -1;
+}
+bool ORUndoStack::CanRedo() const
+{
+    return Cursor < (int)Stack.size() - 1;
+}
+void ORUndoStack::Release()
+{
+    while (Cursor < (int)Stack.size() - 1)
+        Stack.pop_back();
+}
+void ORUndoStack::Push(const _Item& a)
+{
+    Release();
+    Stack.push_back(a);
+    ++Cursor;
+    //IBF_Inst_Project.Project.ChangeAfterSave = true;
+}
+void ORUndoStack::Clear()
+{
+    Stack.clear();
+}
+ORUndoStack::_Item* ORUndoStack::Top()
+{
+    if (Cursor <= -1)return nullptr;
+    else return &Stack.at(Cursor);
 }

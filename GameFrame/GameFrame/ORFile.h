@@ -19,6 +19,30 @@ public:
     ORReadStraw() = default;
     ORReadStraw(const ORReadStraw&) = delete;
     ORReadStraw(ORReadStraw&&);
+
+    bool ReadLabel(std::string& Str);
+    template<typename T>
+    bool Read(T& Data)
+    {
+        return Get(&Data, sizeof(T));
+    }
+    template<>
+    bool Read(std::string& Str)
+    {
+        size_t Size;
+        if (!Read(Size))return false;
+        Str.resize(Size);
+        return Get(Str.data(), Size) == Size;
+    }
+    template<typename T>
+    bool ReadVector(std::vector<T>& Data)
+    {
+        size_t Size;
+        if (!Read(Size))return false;
+        Data.resize(Size);
+        return Read(Data.data(), sizeof(T), Size);
+    }
+    int ReadVector(std::vector<std::string>& Data);
 };
 
 class ORStaticStraw : public ORReadStraw

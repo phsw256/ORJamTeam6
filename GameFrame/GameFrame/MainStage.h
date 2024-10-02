@@ -7,6 +7,7 @@
 #include "ORImage.h"
 #include "ORFile.h"
 #include "ORComponent.h"
+#include "ORBackType.h"
 #include "MusicMCI.h"
 
 ORResourcePool<ORImage> Pool1;
@@ -66,7 +67,7 @@ int ExitUninit()
 		GlobalLog.AddLog("程序正在结束运行。");
 	}
 
-	//PreLink::CleanUp();
+	PreLink::CleanUp();
 
 	if (EnableLog)
 	{
