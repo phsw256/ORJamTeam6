@@ -51,3 +51,7 @@ examples/example_glut_opengl2/example_glut_opengl2
 examples/example_null/example_null
 examples/example_sdl_opengl2/example_sdl_opengl2
 examples/example_sdl_opengl3/example_sdl_opengl3
+/GameFrame/GameFrame/x64/Debug/GameFrame.tlog/GameFrame.lastbuildstate
+*.tlog
+*.idb
+/GameFrame/GameFrame/Release/GameFrame.tlog/CL.command.1.tlog

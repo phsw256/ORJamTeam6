@@ -8,6 +8,13 @@
 
 int ExitUninit();
 
+namespace ORTest
+{
+    void Init();
+    void Loop();
+    void CleanUp();
+}
+
 namespace PreLink
 {
     GLFWwindow* window;

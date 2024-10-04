@@ -5,7 +5,11 @@
 #include "Minimal.h"
 
 class LogClass;
+class ORWorkSpace;
+class ORImage;
 namespace Ini{ struct IniFile; }
+template<typename T>
+class ORResourcePool;
 
 extern LogClass GlobalLog;
 extern BufString LogBuf;
@@ -30,3 +34,6 @@ extern std::atomic<bool> FontLoaded;
 extern std::atomic<bool> InMainLoop;
 
 extern HWND MainWindowHandle;
+
+extern ORWorkSpace WorkSpace;
+extern ORResourcePool<ORImage> ImagePool;

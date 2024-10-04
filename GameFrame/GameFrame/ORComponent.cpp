@@ -72,6 +72,7 @@ void ORTopBar::DrawUI()
     {
         if (!Stages[i])continue;
         if (!ShowDisabledButtons && !Stages[i]->IsEnabled())continue;
+        if (DrawUIExtFilter && !DrawUIExtFilter->IsSelected(*Stages[i]))continue;
         if (Stages[i]->DrawButton())
         {
             CurrentStage = i;
@@ -313,21 +314,16 @@ void ORPopUpManager::DrawUI()
     }
 }
 
-template<typename Cont>
-void Browse_ShowList(const std::string& suffix, std::vector<Cont>& Ser, int* Page, const std::function<void(Cont&, int, int)>& Callback, int KeyPerPage)
+
+void Browse_ShowList_Impl(const std::string& suffix, int Sz, int* Page, int KeyPerPage)
 {
     int RenderF = (*Page) * KeyPerPage;
     int RenderN = (1 + (*Page)) * KeyPerPage;
-    int Sz = Ser.size();
     bool HasPrev = ((*Page) != 0);
     bool HasNext = (RenderN < Sz);
     int RealRF = std::max(RenderF, 0);
     int RealNF = std::min(RenderN, Sz);
-    int PageN = GetPage(Sz);
-    for (int On = RealRF; On < RealNF; On++)
-    {
-        Callback(Ser.at(On), On - RealRF + 1, On);
-    }
+    int PageN = (Sz - 1) / KeyPerPage + 1;
     if (HasPrev || HasNext)
     {
         if (HasPrev)
@@ -430,11 +426,7 @@ void Browse_ShowList(const std::string& suffix, std::vector<Cont>& Ser, int* Pag
     }
 }
 
-template<typename Cont>
-void ORListMenu<Cont>::DrawUI()
-{
-    Browse_ShowList(Tag, List, &Page, Action, KeyPerPage);
-}
+
 
 
 bool ORUndoStack::Undo()

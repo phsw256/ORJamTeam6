@@ -192,13 +192,12 @@ namespace PreLink
 
         Pool1.Emplace("001", true, "001.png");
         Mg1.BackGround = Pool1.GetResource("001");
-        Ms1.open(L"lonj.mp3");
-        Ms1.play();
-        Ms1.setVolume(500);
+        ORTest::Init();
     }
     
     void CleanUp()
     {
+        ORTest::CleanUp();
         // Cleanup
         ImGui_ImplOpenGL2_Shutdown();
         ImGui_ImplGlfw_Shutdown();

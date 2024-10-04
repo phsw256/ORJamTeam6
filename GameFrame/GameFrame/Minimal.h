@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <memory>
 #define _UTF8
 typedef unsigned       hash_t;
 const int MAX_LINE_LENGTH = 5000;
@@ -18,3 +19,6 @@ struct PointerArray
 };
 
 using BytePointerArray = PointerArray<unsigned char>;
+
+template<typename T>
+using ORResPtr = std::shared_ptr<T>;

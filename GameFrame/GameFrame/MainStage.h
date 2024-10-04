@@ -44,7 +44,7 @@ void ControlPanel()
     ImGui::End();//*/
 
     //TEST 23/03/18
-
+    ORTest::Loop();
 
     static bool pp = true;
     ImGui::OpenPopup(u8"TestUI");

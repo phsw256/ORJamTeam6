@@ -105,8 +105,9 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\..;..\..\backends;..\libs\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/Zc:char8_t- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -162,6 +163,7 @@
     <ClInclude Include="ORException.h" />
     <ClInclude Include="ORFile.h" />
     <ClInclude Include="ORImage.h" />
+    <ClInclude Include="ORTest.h" />
     <ClInclude Include="ORTimer.h" />
     <ClInclude Include="PreLink.h" />
     <ClInclude Include="Resource.h" />
@@ -190,6 +192,7 @@
     <ClCompile Include="ORException.cpp" />
     <ClCompile Include="ORFile.cpp" />
     <ClCompile Include="ORImage.cpp" />
+    <ClCompile Include="ORTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon1.ico" />

@@ -1,4 +1,5 @@
 #include "Include.h"
+#include "ORComponent.h"
 LogClass GlobalLog{ "browser.log" };
 BufString LogBuf;
 
@@ -21,3 +22,6 @@ std::atomic<bool> FontLoaded = false;
 std::atomic<bool> InMainLoop = false;
 
 HWND MainWindowHandle = 0;
+
+ORWorkSpace WorkSpace;
+ORResourcePool<ORImage> ImagePool;

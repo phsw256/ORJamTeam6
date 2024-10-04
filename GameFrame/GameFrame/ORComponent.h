@@ -3,6 +3,7 @@
 #include "ORImage.h"
 #include "Minimal.h"
 #include "ORTimer.h"
+#include "ORBackType.h"
 
 ImVec2 WindowRelPos(ImVec2 Rel);
 ImVec2 FontRelPos(ImVec2 Rel);
@@ -24,7 +25,7 @@ public:
 class ORComponent : public ORDrawable
 {
 public:
-    std::shared_ptr<ORImage> BackGround;
+    ORResPtr<ORImage> BackGround;
 
     virtual ~ORComponent() = default;
     ORComponent() = default;
@@ -90,6 +91,7 @@ class ORTopBar : public ORComponent
     std::vector<std::unique_ptr<ORStage>> Stages;
     int CurrentStage{ 0 };
 public:
+    ORResPtr<ORFilter<ORStage>> DrawUIExtFilter;
     bool ShowDisabledButtons{ true };
 
     virtual ~ORTopBar() = default;
@@ -186,16 +188,17 @@ class ORListMenu : public ORComponent
 {
     std::vector<Cont>& List;
     int Page{ 0 };
-    int KeyPerPage{ 10 };
+    int KeyPerPage;
+    DWORD Reserved;
 public:
     typedef Cont Type;
-    typedef std::function<void(Cont&, int, int)> ActionType;
+    typedef std::function<void(Cont&, int, int, DWORD)> ActionType;
     std::string Tag;
     ActionType Action;
 
     ORListMenu() = delete;
-    ORListMenu(std::vector<Cont>& L, const std::string& t, const ActionType& a, int _KeyPerPage) :
-        List(L), Page(0), Tag(t), Action(a), KeyPerPage(_KeyPerPage) {}
+    ORListMenu(std::vector<Cont>& L, const std::string& t, const ActionType& a, DWORD _Reserved = 0, int _KeyPerPage = 10) :
+        List(L), Page(0), Tag(t), Action(a), KeyPerPage(_KeyPerPage), Reserved(_Reserved) {}
     inline int& PageLength() { return KeyPerPage; }
     inline int PageLength() const { return KeyPerPage; }
 
@@ -203,6 +206,27 @@ public:
     virtual ~ORListMenu() = default;
     virtual void DrawUI();
 };
+
+void Browse_ShowList_Impl(const std::string& suffix, int Sz, int* Page, int KeyPerPage);
+template<typename Cont>
+void Browse_ShowList(const std::string& suffix, std::vector<Cont>& Ser, int* Page, const std::function<void(Cont&, int, int, DWORD)>& Callback, int KeyPerPage, DWORD Reserved)
+{
+    int RenderF = (*Page) * KeyPerPage;
+    int RenderN = (1 + (*Page)) * KeyPerPage;
+    int RealRF = std::max(RenderF, 0);
+    int RealNF = std::min(RenderN, (int)Ser.size());
+    for (int On = RealRF; On < RealNF; On++)
+    {
+        Callback(Ser.at(On), On - RealRF + 1, On, Reserved);
+    }
+    Browse_ShowList_Impl(suffix, Ser.size(), Page, KeyPerPage);
+}
+
+template<typename Cont>
+void ORListMenu<Cont>::DrawUI()
+{
+    Browse_ShowList(Tag, List, &Page, Action, KeyPerPage, Reserved);
+}
 
 class ORUndoStack
 {
@@ -234,4 +258,8 @@ public:
     ORHintManager BottomBar;
     ORPopUpManager PopUpManager;
     ORUndoStack UndoStack;
+
+    ORWorkSpace() = default;
+    ORWorkSpace(const ORWorkSpace&) = delete;
+    ORWorkSpace(ORWorkSpace&&) = delete;
 };
