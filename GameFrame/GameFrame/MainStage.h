@@ -46,6 +46,7 @@ void ControlPanel()
     //TEST 23/03/18
     ORTest::Loop();
 
+    /*
     static bool pp = true;
     ImGui::OpenPopup(u8"TestUI");
     if (ImGui::BeginPopupModal(u8"TestUI", &pp))
@@ -56,6 +57,7 @@ void ControlPanel()
         ImGui::Text(u8"woc %d", iiii);
         ImGui::EndPopup();
     }
+    */
 }
 
 
@@ -67,7 +69,8 @@ int ExitUninit()
 		GlobalLog.AddLog("程序正在结束运行。");
 	}
 
-	PreLink::CleanUp();
+    ORTest::CleanUp();
+	//PreLink::CleanUp();
 
 	if (EnableLog)
 	{

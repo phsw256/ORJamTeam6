@@ -174,6 +174,43 @@ namespace ETimer
 		bool PauseMode() { return InPause; }
 	};
 
+    class RateClass :private TimerClass
+    {
+        dura_t Duration;
+    public:
+        RateClass(inttime_t Rate) :Duration(ClockTicksPerSec / Rate), TimerClass(dura_t(ClockTicksPerSec / Rate))
+        {
+
+        }
+        bool NextFrame()
+        {
+            if (TimeUp())
+            {
+                Set(Duration);
+                return true;
+            }
+            else return false;
+        }
+    };
+
+    class StrictRateClass
+    {
+        inttime_t RateInt;
+        inttime_t Count;
+        timer_t Begin;
+    public:
+        StrictRateClass(inttime_t Rate) :RateInt(Rate), Count(0), Begin(ClockNow()) {}
+        bool NextFrame()
+        {
+            if (Count * ClockTicksPerSec < (ClockNow() - Begin).count() * RateInt)
+            {
+                ++Count; return true;
+            }
+            else return false;
+        }
+    };
 }
 
 using ETimer::TimerClass;
+using ETimer::RateClass;
+using ETimer::StrictRateClass;

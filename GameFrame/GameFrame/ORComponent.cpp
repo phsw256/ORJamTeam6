@@ -12,6 +12,15 @@ ImVec2 FontRelPos(ImVec2 Rel)
 {
     return { ImGui::GetFontSize() * Rel.x,ImGui::GetFontSize() * Rel.y };
 }
+void InvisibleArrow(const char* Label)
+{
+    ImGui::PushStyleColor(ImGuiCol_Text, { 0,0,0,0 });
+    ImGui::PushStyleColor(ImGuiCol_Button, { 0,0,0,0 });
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0,0,0,0 });
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0,0,0,0 });
+    ImGui::ArrowButton(Label, ImGuiDir_Left);
+    ImGui::PopStyleColor(4);
+}
 
 ORComponentFrame::ORComponentFrame(ImVec2 position, ImVec2 size) : ORComponent()
 {
@@ -85,6 +94,7 @@ void ORTopBar::DrawUI()
         }
         ImGui::SameLine();
     }
+    ImGui::NewLine();
 }
 void ORTopBar::AddStage(std::unique_ptr<ORStage>&& pStage)
 {
@@ -343,13 +353,8 @@ void Browse_ShowList_Impl(const std::string& suffix, int Sz, int* Page, int KeyP
         }
         else
         {
-            ImGui::PushStyleColor(ImGuiCol_Text, { 0,0,0,0 });
-            ImGui::PushStyleColor(ImGuiCol_Button, { 0,0,0,0 });
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0,0,0,0 });
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0,0,0,0 });
-            ImGui::ArrowButton(("prev_" + suffix).c_str(), ImGuiDir_Left);
+            InvisibleArrow(("prev_" + suffix).c_str());
             ImGui::SameLine();
-            ImGui::PopStyleColor(4);
         }
         if ((*Page) + 1 >= 1000)ImGui::SetCursorPosX(FontHeight * 13.0f);
         if ((*Page) + 1 >= 100)ImGui::SetCursorPosX(FontHeight * 12.5f);

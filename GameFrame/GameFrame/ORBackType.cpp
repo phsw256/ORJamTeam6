@@ -1,4 +1,6 @@
 #include "ORBackType.h"
+#include "Global.h"
+#include "Include.h"
 
 bool ORVariableList::Load(JsonObject FromJson)
 {
@@ -91,10 +93,11 @@ public:
     int* Current;
     ORPlayListImplParam Param;
 
-    ORResPtr<MusicMCI> GetCurrentMusic()
+    ORResPtr<ListedMusic> GetCurrentMusic()
     {
-        if (Data->Sequence.size() > (size_t)*Current)return Data->List.GetResource(Data->Sequence[*Current]);
-        else return ORResPtr<MusicMCI>{};
+        //if (Data->Sequence.size() > (size_t)*Current)return Data->List.GetResource(Data->Sequence[*Current]);
+        //else return ORResPtr<MusicMCI>{};
+        return Data->List.GetResource(Data->Sequence[*Current]);
     }
     void Send(DWORD result)
     {
@@ -132,16 +135,31 @@ void ORAsyncPlayList_ThreadLoop(ORAsyncPlayList::Internal* Data, const std::stri
     }
     else
     {
-        switch (Data->Mode)
+        if (StartID.empty())
         {
-        case ORAsyncPlayList::SwitchMode::Random:
-            CurrentSong = rand() % Data->Sequence.size(); break;
-        case ORAsyncPlayList::SwitchMode::Ordered:
-        case ORAsyncPlayList::SwitchMode::Loop:
-            CurrentSong = 0; break;
+            switch (Data->Mode)
+            {
+            case ORAsyncPlayList::SwitchMode::Random:
+                CurrentSong = rand() % Data->Sequence.size(); break;
+            case ORAsyncPlayList::SwitchMode::Ordered:
+            case ORAsyncPlayList::SwitchMode::Loop:
+                CurrentSong = 0; break;
+            }
+        }
+        else
+        {
+            for (size_t i = 0; i < Data->Sequence.size(); i++)
+                if (Data->Sequence[i] == StartID)
+                {
+                    CurrentSong = i; break;
+                }
         }
         auto pCurMusic = StackParam.GetCurrentMusic();
-        if (pCurMusic)pCurMusic->play();
+        if (pCurMusic)
+        {
+            pCurMusic->open_play();
+            pCurMusic->setVolume(Data->CurVolume);
+        }
     }
     while (Data->Playing.load())
     {
@@ -155,7 +173,7 @@ void ORAsyncPlayList_ThreadLoop(ORAsyncPlayList::Internal* Data, const std::stri
         {
             DWORD Cur{}, Tot{};
             pCur->getCurrentTime(Cur);
-            pCur->getCurrentTime(Tot);
+            pCur->getTotalTime(Tot);
             if (Cur >= Tot)
             {
                 switch (Data->Mode)
@@ -173,7 +191,8 @@ void ORAsyncPlayList_ThreadLoop(ORAsyncPlayList::Internal* Data, const std::stri
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
-    Data->List.GetResource(Data->Sequence.at(CurrentSong))->stop();
+    auto pCur = Data->List.GetResource(Data->Sequence.at(CurrentSong));
+    pCur->stop_close();
     return;
 }
 
@@ -183,10 +202,12 @@ bool ORAsyncPlayList::AddToList(const std::string_view ID, LPCWSTR music, bool R
     auto [it, success] = Data.List.EmplaceAndReturn(ID, Replace);
     if (!success)return false;
     if (it == Data.List.ItEnd())return false;
-    if (!it->second->open(music))
+    /*if (!it->second->open(music))
     {
         Data.List.DeleteResource(ID); return false;
     }
+    */
+    it->second->SetName(music);
     Data.Sequence.emplace_back(ID);
     return true;
 }
@@ -200,9 +221,13 @@ bool ORAsyncPlayList::ClearList()
 
 void ORAsyncPlayList::StartPlay(const std::string_view StartID)
 {
+    GlobalLog.AddLog(Player.get());
     if (Player)return;
     Player.reset(new std::thread(ORAsyncPlayList_ThreadLoop, &Data, StartID));
-    while (!IsPlaying())std::this_thread::sleep_for(std::chrono::microseconds(100));
+    while (!IsPlaying())
+    {
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
+    }
 }
 void ORAsyncPlayList::StartPlay()
 {
@@ -214,6 +239,8 @@ void ORAsyncPlayList::EndPlay()
     if (!Player)return;
     Data.Playing.store(false);
     Player->join();
+    Data.Post.Clear();
+    Data.Result.Clear();
     Player.reset();
 }
 
@@ -226,7 +253,18 @@ DWORD ORAsyncPlayList::WaitForResult()
     Data.Result.SetCont(vs.begin() + 1, vs.end());
     return Ret;
 }
-
+std::vector<DWORD> ORAsyncPlayList::WaitForResult(size_t Count)
+{
+    std::vector<DWORD> vs;
+    while (Data.Result.Size() < Count) std::this_thread::sleep_for(std::chrono::microseconds(100));
+    Data.Result.GetCopyAndClear(vs);
+    Data.Result.SetCont(vs.begin() + Count, vs.end());
+    return std::vector<DWORD>(vs.begin(), vs.begin() + Count);
+}
+size_t ORAsyncPlayList::ReceivedCount()
+{
+    return Data.Result.Size();
+}
 
 void ORAsyncPlayList::PlayNext(bool AllowCyclePlay, bool IgnoreResult)
 {
@@ -238,7 +276,7 @@ void ORAsyncPlayList::PlayPrev(bool AllowCyclePlay, bool IgnoreResult)
 }
 void ORAsyncPlayList::SetSwitchMode(SwitchMode Mode, bool IgnoreResult)
 {
-    Data.Post.Push({ Internal_PlayPrev, ORPlayListImplParam{ DWORD(Mode) , IgnoreResult} });
+    Data.Post.Push({ Internal_SetSwitchMode, ORPlayListImplParam{ DWORD(Mode) , IgnoreResult} });
 }
 void ORAsyncPlayList::SetPlayFromFirst(bool IgnoreResult)
 {
@@ -248,7 +286,9 @@ void ORAsyncPlayList::SwitchTo(const std::string_view ID, bool IgnoreResult)
 {
     for (size_t i = 0; i < Data.Sequence.size(); i++)
         if (Data.Sequence[i] == ID)
-            SwitchTo(i, IgnoreResult);
+        {
+            SwitchTo(i, IgnoreResult); break;
+        }
 }
 void ORAsyncPlayList::SwitchTo(int Sequence, bool IgnoreResult)
 {
@@ -278,20 +318,32 @@ void ORAsyncPlayList::SetCurrentStartTime(DWORD StartMilli, bool IgnoreResult)
 {
     Data.Post.Push({ Internal_SetCurrentStartTime, ORPlayListImplParam{ StartMilli , IgnoreResult} });
 }
-DWORD ORAsyncPlayList::TotalTime()
+DWORD ORAsyncPlayList::SyncTotalTime()
 {
-    Data.Post.Push({ Internal_TotalTime, ORPlayListImplParam{ 0 ,true } });
+    Data.Post.Push({ Internal_TotalTime, ORPlayListImplParam{ 0 ,false } });
     return WaitForResult();
 }
-DWORD ORAsyncPlayList::CurrentTime()
+DWORD ORAsyncPlayList::SyncCurrentTime()
 {
-    Data.Post.Push({ Internal_CurrentTime, ORPlayListImplParam{ 0 ,true } });
+    Data.Post.Push({ Internal_CurrentTime, ORPlayListImplParam{ 0 ,false } });
     return WaitForResult();
 }
-DWORD ORAsyncPlayList::CurrentMusicIdx()
+DWORD ORAsyncPlayList::SyncCurrentMusicIdx()
 {
-    Data.Post.Push({ Internal_CurrentIdx, ORPlayListImplParam{ 0 ,true } });
+    Data.Post.Push({ Internal_CurrentIdx, ORPlayListImplParam{ 0 ,false } });
     return WaitForResult();
+}
+void ORAsyncPlayList::AsyncTotalTime()
+{
+    Data.Post.Push({ Internal_TotalTime, ORPlayListImplParam{ 0 ,false } });
+}
+void ORAsyncPlayList::AsyncCurrentTime()
+{
+    Data.Post.Push({ Internal_CurrentTime, ORPlayListImplParam{ 0 ,false } });
+}
+void ORAsyncPlayList::AsyncCurrentMusicIdx()
+{
+    Data.Post.Push({ Internal_CurrentIdx, ORPlayListImplParam{ 0 ,false } });
 }
 
 const char* ORAsyncPlayList::GetSwitchModeStr(ORAsyncPlayList::SwitchMode Mode)
@@ -329,12 +381,16 @@ void Internal_PlayNext(ORPlayListImpl* pImpl)
     if (*pImpl->Current < sz - 1 || pImpl->Param.Param)
     {
         auto pCurMusic = pImpl->GetCurrentMusic();
-        if (pCurMusic)pCurMusic->stop();
+        if (pCurMusic)pCurMusic->stop_close();
         ++(*pImpl->Current);
         if (pImpl->Param.Param && *pImpl->Current >= sz)(*pImpl->Current) -= sz;
         idx = *pImpl->Current;
         pCurMusic = pImpl->GetCurrentMusic();
-        if (pCurMusic)pCurMusic->play();
+        if (pCurMusic)
+        {
+            pCurMusic->open_play();
+            pCurMusic->setVolume(pImpl->Data->CurVolume);
+        }
     }
     pImpl->Send(idx);
 }
@@ -345,12 +401,16 @@ void Internal_PlayPrev(ORPlayListImpl* pImpl)
     if (*pImpl->Current > 0 || pImpl->Param.Param)
     {
         auto pCurMusic = pImpl->GetCurrentMusic();
-        if (pCurMusic)pCurMusic->stop();
+        if (pCurMusic)pCurMusic->stop_close();
         if (pImpl->Param.Param && *pImpl->Current <= 0)(*pImpl->Current) += sz;
         --(*pImpl->Current);
         idx = *pImpl->Current;
         pCurMusic = pImpl->GetCurrentMusic();
-        if (pCurMusic)pCurMusic->play();
+        if (pCurMusic)
+        {
+            pCurMusic->open_play();
+            pCurMusic->setVolume(pImpl->Data->CurVolume);
+        }
     }
     pImpl->Send(idx);
 }
@@ -362,10 +422,26 @@ void Internal_SwitchTo(ORPlayListImpl* pImpl)
         if (pImpl->Param.Param >= 0 && pImpl->Param.Param < sz)
         {
             auto pCurMusic = pImpl->GetCurrentMusic();
-            if (pCurMusic)pCurMusic->stop();
+            if (pCurMusic)pCurMusic->stop_close();
             (*pImpl->Current) = pImpl->Param.Param;
             pCurMusic = pImpl->GetCurrentMusic();
-            if (pCurMusic)pCurMusic->play();
+            if (pCurMusic)
+            {
+                pCurMusic->open_play();
+                pCurMusic->setVolume(pImpl->Data->CurVolume);
+            }
+        }
+    }
+    else
+    {
+        DWORD Cur{}, Tot{};
+        auto pCur = pImpl->GetCurrentMusic();
+        pCur->getCurrentTime(Cur);
+        pCur->getTotalTime(Tot);
+        if (Cur >= Tot)
+        {
+            pCur->stop();
+            pCur->play();
         }
     }
     pImpl->Send(*pImpl->Current);
@@ -374,6 +450,7 @@ void Internal_SetVolume(ORPlayListImpl* pImpl)
 {
     auto pCurMusic = pImpl->GetCurrentMusic();
     pImpl->Data->CurVolume = pImpl->Param.Param;
+    pCurMusic->setVolume(pImpl->Param.Param);
     pImpl->Send(1);
 }
 void Internal_SetCurrentStartTime(ORPlayListImpl* pImpl)

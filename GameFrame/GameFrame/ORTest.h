@@ -9,6 +9,9 @@ private:
     ORAsyncPlayList PlayList;
     ORListMenu<std::string> Menu;
     int VolumeSlider{ 800 };
+    int TimeSlider{ 0 };
+    std::vector<DWORD>ResultBuffer;
+    RateClass RefreshRate;
 public:
     virtual ~ORStage_MusicPlayer() = default;
     virtual void DrawUI();

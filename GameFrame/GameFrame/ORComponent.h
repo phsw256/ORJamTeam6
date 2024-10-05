@@ -10,6 +10,7 @@ ImVec2 FontRelPos(ImVec2 Rel);
 template <typename T>
 inline ImGuiID GetIDByObject(const T* This) { return reinterpret_cast<ImGuiID>(This); }
 #define ThisImGuiID (GetIDByObject(this))
+void InvisibleArrow(const char* Label);
 
 class ORDrawable
 {

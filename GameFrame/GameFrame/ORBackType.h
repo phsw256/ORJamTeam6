@@ -137,6 +137,13 @@ public:
         Lock.unlock();
         return Ret;
     }
+    size_t Size()
+    {
+        Lock.lock();
+        size_t Ret = Store.size();
+        Lock.unlock();
+        return Ret;
+    }
     Cont& GetStoreRaw()
     {
         return Store;
@@ -214,13 +221,6 @@ struct ORVariableList
     //void Write(const ExtFileClass& File)const;//不管UpValue
 };
 
-class UpdatableMusic:public MusicMCI
-{
-public:
-    virtual  ~UpdatableMusic() = default;
-    virtual bool Update() = 0; //返回false则移除
-};
-
 class ORPlayListImplParam
 {
 public:
@@ -240,13 +240,13 @@ public:
     };
     struct Internal
     {
-        ORResourcePool<MusicMCI> List;
+        ORResourcePool<ListedMusic> List;
         std::vector<std::string> Sequence;
         std::atomic<bool> Playing;
-        SwitchMode Mode;
+        SwitchMode Mode{ SwitchMode::Random };
         ORInfoStack<std::pair<void(*)(ORPlayListImpl*), ORPlayListImplParam>> Post;
         ORInfoStack<DWORD> Result;
-        DWORD CurVolume;
+        DWORD CurVolume{ 0 };
     };
 private:
     Internal Data;
@@ -275,14 +275,19 @@ public:
     void SetVolume(DWORD Volume, bool IgnoreResult = true);//0~1000
     void SetCurrentStartTime(DWORD StartMilli, bool IgnoreResult = true);
 
-    DWORD TotalTime();
-    DWORD CurrentTime();
-    DWORD CurrentMusicIdx();
+    DWORD SyncTotalTime();
+    DWORD SyncCurrentTime();
+    DWORD SyncCurrentMusicIdx();
+    void AsyncTotalTime();
+    void AsyncCurrentTime();
+    void AsyncCurrentMusicIdx();
     DWORD WaitForResult();
+    std::vector<DWORD> WaitForResult(size_t Count);
+    size_t ReceivedCount();
 
     static const _UTF8 char* GetSwitchModeStr(SwitchMode Mode);
-    inline std::string_view GetName(int Idx) { return (Idx >= 0 && Idx < (int)Data.Sequence.size()) ? Data.Sequence.at(Idx) : ""; }
-    inline std::string_view GetCurrentMusicName() { return GetName((int)CurrentMusicIdx()); }
+    inline std::string_view GetName(size_t Idx) { return (Idx >= 0 && Idx < Data.Sequence.size()) ? Data.Sequence.at(Idx) : ""; }
+    inline std::string_view GetCurrentMusicName() { return GetName(SyncCurrentMusicIdx()); }
     inline std::vector<std::string>& GetSequence() { return Data.Sequence; }
     inline SwitchMode GetCurrentSwitchMode() { return Data.Mode; }
     inline const _UTF8 char* GetCurrentSwitchModeStr() { return GetSwitchModeStr(Data.Mode); }

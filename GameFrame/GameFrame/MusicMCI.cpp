@@ -189,3 +189,4 @@ bool MusicMCI::setStartTime(size_t start_time) noexcept
     else
         return false;
 }
+

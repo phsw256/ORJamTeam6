@@ -55,3 +55,6 @@ examples/example_sdl_opengl3/example_sdl_opengl3
 *.tlog
 *.idb
 /GameFrame/GameFrame/Release/GameFrame.tlog/CL.command.1.tlog
+/GameFrame/GameFrame/Release/GameFrame.iobj
+/GameFrame/GameFrame/Release/GameFrame.ipdb
+/GameFrame/GameFrame/Release/GameFrame.tlog/link.read.1.tlog
