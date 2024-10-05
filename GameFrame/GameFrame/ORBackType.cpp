@@ -15,15 +15,15 @@ void ORVariableList::Merge(const ORVariableList& Another, bool MergeUpValue)
 {
     for (const auto& p : Another.Value)
         Value[p.first] = p.second;
-    if (MergeUpValue && UpValue != nullptr && Another.UpValue != nullptr && UpValue != Another.UpValue)
-        UpValue->Merge(*Another.UpValue, true);
+    if (MergeUpValue && Another.UpValue && UpValue != Another.UpValue)
+        Merge(*Another.UpValue, true);
 }
 const std::string& ORVariableList::GetVariable(const std::string& Name) const
 {
-    static std::string Null = "";
+    static const std::string Null = "";
     auto It = Value.find(Name);
     if (It != Value.end())return It->second;
-    else if (UpValue == nullptr)return Null;
+    else if (!UpValue)return Null;
     else return UpValue->GetVariable(Name);
 }
 bool ORVariableList::HasValue(const std::string& Name) const
