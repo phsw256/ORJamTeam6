@@ -25,6 +25,107 @@ public:
     }
 };
 
+class Stage_MainMenu : public ORStage
+{
+public:
+    virtual ~Stage_MainMenu() = default;
+    virtual void DrawUI();
+    virtual void EventLoop();
+    virtual void OnSwitched();
+    Stage_MainMenu(const _UTF8 std::string_view StageName);
+};
+
+
+struct ShellSetting
+{
+    bool MMPMode;
+};
+
+struct 教程关Rules {};
+
+struct RulesClass
+{
+    ShellSetting Setting;
+    bool ITeachYouHowToPlayThisFuckingGame;
+    RulesClass(const ShellSetting& setting):Setting(setting)
+    {
+        ITeachYouHowToPlayThisFuckingGame = false;
+    }
+    RulesClass(教程关Rules)
+    {
+        Setting.MMPMode = false;
+        ITeachYouHowToPlayThisFuckingGame = true;
+    }
+};
+
+class Stage_ShellSelect : public ORStage
+{
+    ShellSetting Setting;
+public:
+    virtual ~Stage_ShellSelect() = default;
+    virtual void DrawUI();
+    virtual void EventLoop();
+    virtual void OnSwitched();
+    Stage_ShellSelect(const _UTF8 std::string_view StageName);
+};
+
+class Stage_InGameOptions : public ORStage
+{
+    ShellSetting Setting;
+public:
+    virtual ~Stage_InGameOptions() = default;
+    virtual void DrawUI();
+    virtual void EventLoop();
+    virtual void OnSwitched();
+    Stage_InGameOptions(const _UTF8 std::string_view StageName);
+};
+
+class Stage_TechTree : public ORStage
+{
+    ShellSetting Setting;
+public:
+    virtual ~Stage_TechTree() = default;
+    virtual void DrawUI();
+    virtual void EventLoop();
+    virtual void OnSwitched();
+    Stage_TechTree(const _UTF8 std::string_view StageName);
+};
+
+class Stage_MainGame : public ORStage
+{
+    std::unique_ptr<RulesClass> Rules;
+public:
+    virtual ~Stage_MainGame() = default;
+    virtual void DrawUI();
+    virtual void EventLoop();
+    virtual void OnSwitched();
+    inline void InitRules(const ShellSetting& Setting)
+    {
+        Rules.reset(new RulesClass(Setting));
+    }
+    inline void InitRules(教程关Rules _)
+    {
+        Rules.reset(new RulesClass(_));
+    }
+    Stage_MainGame(const _UTF8 std::string_view StageName);
+};
+
+class PosSetHelper
+{
+    ImVec2 Pos,Tar;
+public:
+    PosSetHelper(ImVec2 pos) :Tar(pos)
+    {
+        Pos = ImGui::GetCursorPos();
+        ImGui::SetCursorPos(pos);
+    }
+    void SetX() { ImGui::SetCursorPosX(Tar.x); }
+    ~PosSetHelper()
+    {
+        ImGui::SetCursorPos(Pos);
+    }
+};
+
 namespace ORTest
 {
     void Init();

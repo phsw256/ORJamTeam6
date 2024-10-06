@@ -107,6 +107,17 @@ ORStage* ORTopBar::GetCurrentStage() const
     if (p && p->IsEnabled())return p.get();
     return nullptr;
 }
+ORStage* ORTopBar::GetStage(const _UTF8 std::string_view Name) const
+{
+    for (size_t i = 0; i < Stages.size(); i++)
+    {
+        if (Stages[i] && Stages[i]->GetName() == Name)
+        {
+            return Stages[i].get();
+        }
+    }
+    return nullptr;
+}
 bool ORTopBar::ForceChangeStage(int StageID)
 {
     if (StageID == CurrentStage || StageID < 0 || StageID >= (int)Stages.size())return false;

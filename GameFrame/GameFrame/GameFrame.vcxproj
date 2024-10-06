@@ -167,6 +167,7 @@
     <ClInclude Include="ORTimer.h" />
     <ClInclude Include="PreLink.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Stages.h" />
     <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +194,7 @@
     <ClCompile Include="ORFile.cpp" />
     <ClCompile Include="ORImage.cpp" />
     <ClCompile Include="ORTest.cpp" />
+    <ClCompile Include="Stages.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon1.ico" />

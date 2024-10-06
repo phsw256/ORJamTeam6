@@ -7,6 +7,8 @@
 class LogClass;
 class ORWorkSpace;
 class ORImage;
+struct GLFWwindow;
+struct ImFont;
 namespace Ini{ struct IniFile; }
 template<typename T>
 class ORResourcePool;
@@ -37,3 +39,11 @@ extern HWND MainWindowHandle;
 
 extern ORWorkSpace WorkSpace;
 extern ORResourcePool<ORImage> ImagePool;
+
+namespace PreLink
+{
+    extern GLFWwindow* window;
+    extern HINSTANCE hInst;
+    extern ImFont* font;
+    void CleanUp();
+}

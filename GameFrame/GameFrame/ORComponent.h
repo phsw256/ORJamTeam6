@@ -232,6 +232,7 @@ public:
 
     void AddStage(std::unique_ptr<ORStage>&& pStage);
     ORStage* GetCurrentStage() const;
+    ORStage* GetStage(const _UTF8 std::string_view Name) const;
     bool ForceChangeStage(int StageID);
     bool ForceChangeStage(const _UTF8 std::string_view Name);
 
@@ -391,6 +392,7 @@ public:
     ORHintManager BottomBar;
     ORPopUpManager PopUpManager;
     ORUndoStack UndoStack;
+    ORResourcePool<ORImage> ImagePool;
 
     ORWorkSpace() = default;
     ORWorkSpace(const ORWorkSpace&) = delete;

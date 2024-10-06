@@ -37,10 +37,18 @@ void ControlPanel()
     if (ImGui::IsItemHovered())Mg1.SetDesc(u8"等待填入内容");
     ImGui::Text(u8"平均FPS %.1f", ImGui::GetIO().Framerate);
     if (ImGui::IsItemHovered())Mg1.SetDesc(u8"FUCK");
+
+    WorkSpace.TopBar.DrawUI();
+    auto pStage = WorkSpace.TopBar.GetCurrentStage();
+    if (pStage)pStage->DrawUI();
+
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImVec4)(ImColor(0x7F7F7F)));
     Mg1.DrawUI();
     ImGui::PopStyleColor();
     Mg1.Clear();
+
+    
+
     ImGui::End();//*/
 
     //TEST 23/03/18
