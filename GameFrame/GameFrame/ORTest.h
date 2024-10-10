@@ -120,7 +120,7 @@ public:
 class Stage_MainGame : public ORStage
 {
     std::unique_ptr<RulesClass> Rules;
-    ORTileMap TileMap;
+    ORIsoTileMap TileMap;
 
     void InitTileMap();
 public:

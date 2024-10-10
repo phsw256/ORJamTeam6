@@ -96,6 +96,9 @@
     <ClInclude Include="RoundData.h">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="ORLoadable.h">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\imgui.cpp">

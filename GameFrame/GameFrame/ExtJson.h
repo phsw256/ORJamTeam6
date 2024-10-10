@@ -1,13 +1,15 @@
 #pragma once
 
 #include "cJSON.h"
-#include<string>
-#include<vector>
+#include <string>
+#include <vector>
 #include <unordered_map>
+#include <string_view>
 
 bool _IH_IsTrueString(const std::string& s);
 
 std::vector<int> cJSON_GetVectorInt(cJSON* Array);
+std::vector<double> cJSON_GetVectorDouble(cJSON* Array);
 std::vector<uint8_t> cJSON_GetVectorBool(cJSON* Array);
 std::vector<std::string> cJSON_GetVectorString(cJSON* Array);
 std::vector<cJSON*> cJSON_GetVectorObject(cJSON* Array);
@@ -58,7 +60,8 @@ public:
     inline JsonObject GetPrevItem() const { return Object->prev; }
     inline JsonObject GetNextItem() const { return Object->next; }
     inline std::string GetName() const { return Object->string; }
-    inline JsonObject GetObjectItem(const std::string& Str) const;
+    JsonObject GetObjectItem(const std::string& Str) const;
+    JsonObject GetObjectItem(const std::string_view Str) const;
 
     inline bool HasItem(const std::string& Str) const { return GetObjectItem(Str).Available(); }
     
@@ -77,6 +80,7 @@ public:
 
     inline int GetInt() const { return Object->valueint; }
     inline double GetDouble() const { return Object->valuedouble; }
+    inline float GetFloat() const { return (float)Object->valuedouble; }
     inline std::string GetString() const { return Object->valuestring; }
     inline const char* GetCString() const { return Object->valuestring; }
     inline bool GetBool() const { return ((Object->type & 0xFF) == cJSON_True) ? true : false; }
@@ -84,6 +88,7 @@ public:
     inline size_t GetArraySize() const { return (size_t)cJSON_GetArraySize(Object); }
     inline JsonObject GetArrayItem(size_t N) const { return { cJSON_GetArrayItem(Object, N) }; }
     inline std::vector<int> GetArrayInt() const { return cJSON_GetVectorInt(Object); }
+    inline std::vector<double> GetArrayDouble() const { return cJSON_GetVectorDouble(Object); }
     inline std::vector<uint8_t> GetArrayBool() const { return cJSON_GetVectorBool(Object); }
     inline std::vector<std::string> GetArrayString() const { return cJSON_GetVectorString(Object); }
     std::vector<JsonObject> GetArrayObject() const;

@@ -411,6 +411,8 @@ namespace ORTest
         WorkSpace.ImagePool.Emplace("Tile2", false, ".\\Resources\\Image\\Tile2.png", ImVec2{ -0.5F,-0.75F }, UseRelativePosition{});
         WorkSpace.ImagePool.Emplace("Tile3", false, ".\\Resources\\Image\\Tile3.png", ImVec2{ -0.5F,-0.75F }, UseRelativePosition{});
         WorkSpace.ImagePool.Emplace("Tile4", false, ".\\Resources\\Image\\Tile4.png", OriginAtCenter{});
+        WorkSpace.ImagePool.Emplace("MISSING", false, ".\\Resources\\Image\\Missing.png");
+        WorkSpace.MissingImage = WorkSpace.ImagePool.GetResource("MISSING");
     }
     void Loop()
     {

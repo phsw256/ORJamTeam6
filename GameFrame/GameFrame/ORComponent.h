@@ -400,6 +400,7 @@ public:
     ORPopUpManager PopUpManager;
     ORUndoStack UndoStack;
     ORResourcePool<ORImage> ImagePool;
+    ORResPtr<ORImage> MissingImage;
 
     ORWorkSpace() = default;
     ORWorkSpace(const ORWorkSpace&) = delete;

@@ -22,6 +22,19 @@ std::vector<int> cJSON_GetVectorInt(cJSON* Array)
     }
     return Ret;
 }
+std::vector<double> cJSON_GetVectorDouble(cJSON* Array)
+{
+    int N = cJSON_GetArraySize(Array);
+    cJSON* Item = cJSON_GetArrayItem(Array, 0);
+    std::vector<double> Ret;
+    Ret.reserve(N);
+    for (int i = 0; i < N; i++)
+    {
+        Ret.push_back(Item->valuedouble);
+        Item = Item->next;
+    }
+    return Ret;
+}
 std::vector<uint8_t> cJSON_GetVectorBool(cJSON* Array)
 {
     int N = cJSON_GetArraySize(Array);
@@ -97,6 +110,11 @@ JsonObject JsonObject::GetObjectItem(const std::string& Str) const
     }
 */
     return { pObj }; 
+}
+JsonObject JsonObject::GetObjectItem(const std::string_view Str) const
+{
+    auto pObj = cJSON_GetObjectItem(Object, Str.data());
+    return { pObj };
 }
 
 std::string JsonObject::GetText() const
