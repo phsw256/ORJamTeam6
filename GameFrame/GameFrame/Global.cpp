@@ -7,6 +7,8 @@ std::string FontPath = ".\\Resources\\";//全过程不变
 std::string Defaultpath{ "" };
 std::string Pathbuf, Desktop;
 std::wstring PathbufW;
+std::string CurrentPathA, MusicPathA;
+std::wstring CurrentPathW, MusicPathW;
 
 Ini::IniFile Config;
 int FontHeight = 16;

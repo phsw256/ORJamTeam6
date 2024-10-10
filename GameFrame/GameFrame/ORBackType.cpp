@@ -202,11 +202,6 @@ bool ORAsyncPlayList::AddToList(const std::string_view ID, LPCWSTR music, bool R
     auto [it, success] = Data.List.EmplaceAndReturn(ID, Replace);
     if (!success)return false;
     if (it == Data.List.ItEnd())return false;
-    /*if (!it->second->open(music))
-    {
-        Data.List.DeleteResource(ID); return false;
-    }
-    */
     it->second->SetName(music);
     Data.Sequence.emplace_back(ID);
     return true;

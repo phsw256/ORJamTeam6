@@ -99,6 +99,10 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     GetCurrentDirectoryW(MAX_PATH, CurrentDirW);
     GetCurrentDirectoryA(MAX_PATH, CurrentDirA);
     Defaultpath = Desktop = DesktopTmp;
+    CurrentPathA = CurrentDirA;
+    CurrentPathW = CurrentDirW;
+    MusicPathA = CurrentPathA + "\\Resources\\Music";
+    MusicPathW = CurrentPathW + L"\\Resources\\Music";
 
     int PreLoopRet = PreLoop1();
     if (PreLoopRet)return PreLoopRet;

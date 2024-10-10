@@ -20,6 +20,8 @@ extern std::string FontPath;//全过程不变
 extern std::string Defaultpath;
 extern std::string Pathbuf, Desktop;
 extern std::wstring PathbufW;
+extern std::string CurrentPathA, MusicPathA;
+extern std::wstring CurrentPathW, MusicPathW;
 
 extern Ini::IniFile Config;
 extern int FontHeight;

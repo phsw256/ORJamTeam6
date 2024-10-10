@@ -22,3 +22,6 @@ using BytePointerArray = PointerArray<unsigned char>;
 
 template<typename T>
 using ORResPtr = std::shared_ptr<T>;
+
+class UseRelativePosition {};
+class OriginAtCenter {};

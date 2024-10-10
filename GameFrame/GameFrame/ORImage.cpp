@@ -1,16 +1,32 @@
 #include "ORImage.h"
 #include "ORException.h"
 #include "ORFile.h"
+#include <imgui.h>
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui_internal.h>
+
+namespace ImGui
+{
+    void ImageEx(ImTextureID user_texture_id, const ImVec2& delta, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, const ImVec4& tint_col)
+    {
+        ImGuiWindow* window = GetCurrentWindow();
+        if (window->SkipItems)return;
+        ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size + delta);
+        ItemSize(bb);
+        if (!ItemAdd(bb, 0))return;
+        window->DrawList->AddImage(user_texture_id, bb.Min + delta, bb.Max, uv0, uv1, GetColorU32(tint_col));
+    }
+}
 
 void ORImage::DrawChecked()
 {
     if (!Available())throw ORException(u8"ORImage::DrawChecked £∫ªÊ÷∆ ß∞‹");
-    ImGui::Image(GetID(), GetSize());
+    ImGui::ImageEx(GetID(), DrawDelta, GetSize());
 }
 bool ORImage::Draw() noexcept
 {
     if (!Available())return false;
-    ImGui::Image(GetID(), GetSize());
+    ImGui::ImageEx(GetID(), DrawDelta, GetSize());
     return true;
 }
 bool ORImage::Load(const char* pFileName)
@@ -50,18 +66,40 @@ bool ORImage::Load(ORReadStraw& Source)
     OK = (TexID != 0);
     return OK;
 }
-ORImage::ORImage(ORImage&& rhs):TextureData(rhs.TextureData), TexID(rhs.TexID), OK(rhs.OK)
+ORImage::ORImage(ORImage&& rhs) noexcept:TextureData(rhs.TextureData), TexID(rhs.TexID), OK(rhs.OK)
 {
     rhs.TexID = 0;
     rhs.OK = false;
 }
-ORImage::ORImage(const char* pFileName) : ORImage()
+ORImage::ORImage(const char* pFileName, ImVec2 Delta) : ORImage() 
 {
+    DrawDelta = Delta;
     Load(pFileName);
 }
-ORImage::ORImage(ORReadStraw& Source) : ORImage()
+ORImage::ORImage(ORReadStraw& Source, ImVec2 Delta) : ORImage()
+{
+    DrawDelta = Delta;
+    Load(Source);
+}
+ORImage::ORImage(const char* pFileName, ImVec2 Delta, UseRelativePosition) : ORImage()
+{
+    Load(pFileName);
+    DrawDelta = GetSize() * Delta;
+}
+ORImage::ORImage(ORReadStraw& Source, ImVec2 Delta, UseRelativePosition) : ORImage()
 {
     Load(Source);
+    DrawDelta = GetSize() * Delta;
+}
+ORImage::ORImage(const char* pFileName, OriginAtCenter) : ORImage()
+{
+    Load(pFileName);
+    DrawDelta = GetSize() * ImVec2 { -0.5F, -0.5F };
+}
+ORImage::ORImage(ORReadStraw& Source, OriginAtCenter) : ORImage()
+{
+    Load(Source);
+    DrawDelta = GetSize() * ImVec2 { -0.5F, -0.5F };
 }
 
 void GetPNGtextureInfo(int color_type,  gl_texture_t *texinfo)

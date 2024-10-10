@@ -50,6 +50,7 @@ public:
     ListedMusic() = default;								
     virtual ~ListedMusic() = default;
     inline void SetName(LPCWSTR music)noexcept { Name = music; }
+    inline const std::wstring& GetName() const { return Name; }
     inline bool open()noexcept { return MusicMCI::open(Name.c_str()); }
     inline bool open_play()noexcept { return open() && play(); }
     inline bool stop_close()noexcept { return stop() && close(); }

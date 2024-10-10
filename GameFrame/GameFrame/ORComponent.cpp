@@ -70,7 +70,7 @@ bool ORStage::DrawButton()
     ImGui::PopStyleColor(1);
     return Ret;
 }
-ORStage::ORStage(const _UTF8 std::string_view StageName) :ORComponent(), Name(StageName)
+ORStage::ORStage(const _UTF8 std::string_view StageName) :ORComponent(), Name(StageName), Enabled(false)
 {
 
 }
@@ -140,6 +140,17 @@ bool ORTopBar::ForceChangeStage(const _UTF8 std::string_view Name)
         }
     }
     return false;
+}
+void ORTopBar::EventLoop(bool IgnoreDisabledStages)
+{
+    for (auto& pStage : Stages)
+    {
+        if (!pStage)continue;
+        if ( pStage->IsEnabled() || !IgnoreDisabledStages)
+        {
+            pStage->EventLoop();
+        }
+    }
 }
 
 

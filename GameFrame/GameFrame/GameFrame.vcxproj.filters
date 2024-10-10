@@ -84,6 +84,18 @@
     <ClInclude Include="Global.h">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="Stages.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ORGameMap.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="ORTest.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="RoundData.h">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\imgui.cpp">
@@ -150,6 +162,18 @@
       <Filter>Util</Filter>
     </ClCompile>
     <ClCompile Include="Global.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Stages.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ORGameMap.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="ORTest.cpp">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoundData.cpp">
       <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>

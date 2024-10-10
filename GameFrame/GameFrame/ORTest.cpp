@@ -86,6 +86,10 @@ void ORStage_MusicPlayer::DrawUI()
             PlayList.AsyncTotalTime();
         }
     }
+    if (ImGui::Button(u8"返回"))
+    {
+        WorkSpace.TopBar.ForceChangeStage(u8"选项");
+    }
 }
 void ORStage_MusicPlayer::EventLoop()
 {
@@ -118,7 +122,9 @@ void Stage_MainMenu::DrawUI()
     }helper.SetX();
     if (ImGui::Button(u8"选项"))
     {
-
+        auto pSet = WorkSpace.TopBar.GetStage_Typed<Stage_Setting>(u8"选项");
+        if (pSet)pSet->SwitchInMenu();
+        WorkSpace.TopBar.ForceChangeStage(u8"选项");
     }helper.SetX();
     if (ImGui::Button(u8"制作团队"))
     {
@@ -135,7 +141,17 @@ void Stage_MainMenu::EventLoop()
 }
 void Stage_MainMenu::OnSwitched()
 {
-
+    auto pPlayer = WorkSpace.TopBar.GetStage_Typed<ORStage_MusicPlayer>(u8"播放器");
+    if (pPlayer)
+    {
+        auto& List = pPlayer->GetList();
+        if (!List.IsPlaying())
+        {
+            List.StartPlay();
+            List.SetPlayFromFirst();
+            List.SetVolume(InitialVolume);
+        }
+    }
 }
 Stage_MainMenu::Stage_MainMenu(const _UTF8 std::string_view StageName) : ORStage(StageName)
 {
@@ -150,7 +166,7 @@ void Stage_ShellSelect::DrawUI()
     helper.SetX();
     if (ImGui::Button(u8"开始！"))
     {
-        auto pGame = dynamic_cast<Stage_MainGame*>(WorkSpace.TopBar.GetStage(u8"游戏"));
+        auto pGame = WorkSpace.TopBar.GetStage_Typed<Stage_MainGame>(u8"游戏");
         if (pGame)pGame->InitRules(Setting);
         WorkSpace.TopBar.ForceChangeStage(u8"游戏");
     }helper.SetX();
@@ -172,6 +188,42 @@ Stage_ShellSelect::Stage_ShellSelect(const _UTF8 std::string_view StageName) : O
 
 }
 
+void Stage_Setting::DrawUI()
+{
+    ImGui::Text(u8"设置！");
+    if (ImGui::Button(u8"返回"))
+    {
+        if(ToMainMenu)
+            WorkSpace.TopBar.ForceChangeStage(u8"主菜单");
+        else
+            WorkSpace.TopBar.ForceChangeStage(u8"游戏选项");
+    }
+    if (ImGui::Button(u8"背景音乐"))
+    {
+        WorkSpace.TopBar.ForceChangeStage(u8"播放器");
+    }
+}
+void Stage_Setting::EventLoop()
+{
+
+}
+void Stage_Setting::OnSwitched()
+{
+
+}
+Stage_Setting::Stage_Setting(const _UTF8 std::string_view StageName) : ORStage(StageName)
+{
+
+}
+void Stage_Setting::SwitchInGame()
+{
+    ToMainMenu = false;
+}
+void Stage_Setting::SwitchInMenu()
+{
+    ToMainMenu = true;
+}
+
 
 void Stage_MainGame::DrawUI()
 {
@@ -191,6 +243,36 @@ void Stage_MainGame::DrawUI()
     {
         ImGui::TextWrapped(u8"（吃香蕉）（爬树藤)（猴子叫）");
     }
+    if (ImGui::Button(u8"科技树"))
+    {
+        Pause();
+        WorkSpace.TopBar.ForceChangeStage(u8"科技树");
+    }
+    if (ImGui::Button(u8"选项"))
+    {
+        Pause();
+        WorkSpace.TopBar.ForceChangeStage(u8"游戏选项");
+    }
+    auto& Set = TileMap.GetDrawSetting();
+    Set.DrawBorder = ImRect(ImVec2{ 50.0F,150.0F }, ImGui::GetWindowSize() - ImVec2{ 50.0F, 80.0F });
+    Set.ProcessBorder = ImRect({ 0.0F,0.0F }, ImGui::GetWindowSize());
+    Set.DrawTarget = ImGui::GetBackgroundDrawList();
+    Set.CenterDrawPos = WindowRelPos({ 0.5F,0.5F });
+    InvisibleArrow("1"); ImGui::SameLine();
+    if (ImGui::ArrowButton("UP", ImGuiDir_Up))TileMap.MoveView({ -0.2F,-0.2F });
+    if (ImGui::ArrowButton("LEFT", ImGuiDir_Left))TileMap.MoveView({ -0.2F,0.2F });
+    ImGui::SameLine(); InvisibleArrow("2"); ImGui::SameLine();
+    if (ImGui::ArrowButton("RIGHT", ImGuiDir_Right))TileMap.MoveView({ 0.2F,-0.2F });
+    InvisibleArrow("3"); ImGui::SameLine();
+    if (ImGui::ArrowButton("DOWN", ImGuiDir_Down))TileMap.MoveView({ 0.2F,0.2F });
+    TileMap.DrawUI();
+}
+void Stage_MainGame::InitTileMap()
+{
+    TileMap.RandomGenerate(60, 60, WorkSpace.ImagePool, { "Tile1","Tile2","Tile3","Tile4" });
+    auto& Set = TileMap.GetDrawSetting();
+    Set.CenterMapPos = { 30,30 };
+    Set.SizeRatio = { 128,64 };
 }
 void Stage_MainGame::EventLoop()
 {
@@ -204,17 +286,45 @@ Stage_MainGame::Stage_MainGame(const _UTF8 std::string_view StageName) : ORStage
 {
 
 }
+void Stage_MainGame::ExitGame()
+{
+
+}
+void Stage_MainGame::Pause()
+{
+
+}
+void Stage_MainGame::Resume()
+{
+    
+}
 
 void Stage_InGameOptions::DrawUI()
 {
+    if (!Main)return;
     if (ImGui::Button(u8"爷不玩辣！"))
     {
+        Main->ExitGame();
         WorkSpace.TopBar.ForceChangeStage(u8"主菜单");
+    }
+    if (ImGui::Button(u8"选项"))
+    {
+        auto pSet = WorkSpace.TopBar.GetStage_Typed<Stage_Setting>(u8"选项");
+        if (pSet)pSet->SwitchInGame();
+        WorkSpace.TopBar.ForceChangeStage(u8"选项");
+    }
+    if (ImGui::Button(u8"接着玩！"))
+    {
+        Main->Resume();
+        WorkSpace.TopBar.ForceChangeStage(u8"游戏");
     }
 }
 void Stage_InGameOptions::EventLoop()
 {
-
+    if (!Main)
+    {
+        Main = WorkSpace.TopBar.GetStage_Typed<Stage_MainGame>(u8"游戏");
+    }
 }
 void Stage_InGameOptions::OnSwitched()
 {
@@ -244,10 +354,19 @@ void Stage_TechTree::DrawUI()
     auto pGame = dynamic_cast<Stage_MainGame*>(WorkSpace.TopBar.GetStage(u8"游戏"));
     if (pGame)pGame->InitRules(Setting);
     */
+    if (!Main)return;
+    if (ImGui::Button(u8"返回"))
+    {
+        Main->Resume();
+        WorkSpace.TopBar.ForceChangeStage(u8"游戏");
+    }
 }
 void Stage_TechTree::EventLoop()
 {
-
+    if (!Main)
+    {
+        Main = WorkSpace.TopBar.GetStage_Typed<Stage_MainGame>(u8"游戏");
+    }
 }
 void Stage_TechTree::OnSwitched()
 {
@@ -258,32 +377,40 @@ Stage_TechTree::Stage_TechTree(const _UTF8 std::string_view StageName) : ORStage
 
 }
 
+template<typename T>
+void AddEnabledStage(const char* Name)
+{
+    auto p1 = std::make_unique<T>(Name);
+    p1->Enable();
+    WorkSpace.TopBar.AddStage(std::move(p1));
+}
+
 namespace ORTest
 {
     MusicMCI ms1;
     void Init()
     {
         auto ps = std::make_unique<ORStage_MusicPlayer>(u8"播放器");
-        ps->AddToList("Land Of No Justice", L"lonj.mp3", false);
-        ps->AddToList("One Final Chance", L"ofc.mp3", false);
-        ps->AddToList("Premeditated Treachery", L"pt.mp3", false);
-        ps->AddToList("It's Happening", L"ih.mp3", false);
+        ps->AddToList("Land Of No Justice", (MusicPathW + L"\\lonj.mp3").c_str(), false);
+        ps->AddToList("One Final Chance", (MusicPathW + L"\\ofc.mp3").c_str(), false);
+        ps->AddToList("Premeditated Treachery", (MusicPathW + L"\\pt.mp3").c_str(), false);
+        ps->AddToList("It's Happening", (MusicPathW + L"\\ih.mp3").c_str(), false);
         ps->Enable();
         WorkSpace.TopBar.AddStage(std::move(ps));
 
-        auto p1 = std::make_unique<Stage_MainMenu>(u8"主菜单");
-        p1->Enable();
-        WorkSpace.TopBar.AddStage(std::move(p1));
-
-        auto p2 = std::make_unique<Stage_ShellSelect>(u8"开始");
-        p2->Enable();
-        WorkSpace.TopBar.AddStage(std::move(p2));
-
-        auto p3 = std::make_unique<Stage_MainGame>(u8"游戏");
-        p3->Enable();
-        WorkSpace.TopBar.AddStage(std::move(p3));
+        AddEnabledStage<Stage_MainMenu>(u8"主菜单");
+        AddEnabledStage<Stage_Setting>(u8"选项");
+        AddEnabledStage<Stage_ShellSelect>(u8"开始");
+        AddEnabledStage<Stage_MainGame>(u8"游戏");
+        AddEnabledStage<Stage_InGameOptions>(u8"游戏选项");
+        AddEnabledStage<Stage_TechTree>(u8"科技树");
 
         WorkSpace.TopBar.ForceChangeStage(u8"主菜单");
+
+        WorkSpace.ImagePool.Emplace("Tile1", false, ".\\Resources\\Image\\Tile1.png", OriginAtCenter{});
+        WorkSpace.ImagePool.Emplace("Tile2", false, ".\\Resources\\Image\\Tile2.png", ImVec2{ -0.5F,-0.75F }, UseRelativePosition{});
+        WorkSpace.ImagePool.Emplace("Tile3", false, ".\\Resources\\Image\\Tile3.png", ImVec2{ -0.5F,-0.75F }, UseRelativePosition{});
+        WorkSpace.ImagePool.Emplace("Tile4", false, ".\\Resources\\Image\\Tile4.png", OriginAtCenter{});
     }
     void Loop()
     {

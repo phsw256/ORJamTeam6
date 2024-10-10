@@ -38,12 +38,13 @@ void ControlPanel()
     ImGui::Text(u8"Æ½¾ùFPS %.1f", ImGui::GetIO().Framerate);
     if (ImGui::IsItemHovered())Mg1.SetDesc(u8"FUCK");
 
-    WorkSpace.TopBar.DrawUI();
+    WorkSpace.TopBar.EventLoop();
+    //WorkSpace.TopBar.DrawUI();
     auto pStage = WorkSpace.TopBar.GetCurrentStage();
     if (pStage)pStage->DrawUI();
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImVec4)(ImColor(0x7F7F7F)));
-    Mg1.DrawUI();
+    //Mg1.DrawUI();
     ImGui::PopStyleColor();
     Mg1.Clear();
 

@@ -190,7 +190,7 @@ namespace PreLink
         }
         FontLoaded.store(true);
 
-        Pool1.Emplace("001", true, "001.png");
+        Pool1.Emplace("001", true, ".\\Resources\\Image\\001.png");
         Mg1.BackGround = Pool1.GetResource("001");
         ORTest::Init();
     }

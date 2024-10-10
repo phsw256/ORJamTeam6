@@ -181,6 +181,7 @@ public:
     ORComponentFrame(ORComponentFrame&&) = delete;
 };
 
+
 class ORDescManager : public ORComponentFrame
 {
     _UTF8 std::string Desc;
@@ -233,8 +234,14 @@ public:
     void AddStage(std::unique_ptr<ORStage>&& pStage);
     ORStage* GetCurrentStage() const;
     ORStage* GetStage(const _UTF8 std::string_view Name) const;
+    template<typename T>
+    inline T* GetStage_Typed(const _UTF8 std::string_view Name) const
+    {
+       return dynamic_cast<T*>(GetStage(Name));
+    }
     bool ForceChangeStage(int StageID);
     bool ForceChangeStage(const _UTF8 std::string_view Name);
+    void EventLoop(bool IgnoreDisabledStages = true);
 
     ORTopBar() = default;
     ORTopBar(const ORTopBar&) = delete;

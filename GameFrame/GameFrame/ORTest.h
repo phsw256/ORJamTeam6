@@ -1,6 +1,18 @@
 #pragma once
 #include "ORComponent.h"
 #include "ORBackType.h"
+#include "ORGameMap.h"
+
+class ORStage_MusicPlayer;
+class Stage_MainMenu;
+class Stage_ShellSelect;
+class Stage_Setting;
+class Stage_InGameOptions;
+class Stage_TechTree;
+class Stage_MainGame;
+
+const int InitialVolume = 800;
+
 
 class ORStage_MusicPlayer : public ORStage
 {
@@ -8,7 +20,7 @@ private:
     static void DrawMenuElem(std::string&, int RelIdx, int AbsIdx, DWORD pList);
     ORAsyncPlayList PlayList;
     ORListMenu<std::string> Menu;
-    int VolumeSlider{ 800 };
+    int VolumeSlider{ InitialVolume };
     int TimeSlider{ 0 };
     std::vector<DWORD>ResultBuffer;
     RateClass RefreshRate;
@@ -23,6 +35,7 @@ public:
     {
         return PlayList.AddToList(ID, music, Replace);
     }
+    inline ORAsyncPlayList& GetList() { return PlayList; }
 };
 
 class Stage_MainMenu : public ORStage
@@ -38,7 +51,7 @@ public:
 
 struct ShellSetting
 {
-    bool MMPMode;
+    bool MMPMode{ false };
 };
 
 struct 教程关Rules {};
@@ -69,9 +82,22 @@ public:
     Stage_ShellSelect(const _UTF8 std::string_view StageName);
 };
 
+class Stage_Setting : public ORStage
+{
+    bool ToMainMenu{ true };
+public:
+    virtual ~Stage_Setting() = default;
+    virtual void DrawUI();
+    virtual void EventLoop();
+    virtual void OnSwitched();
+    Stage_Setting(const _UTF8 std::string_view StageName);
+    void SwitchInGame();
+    void SwitchInMenu();
+};
+
 class Stage_InGameOptions : public ORStage
 {
-    ShellSetting Setting;
+    Stage_MainGame* Main{ nullptr };
 public:
     virtual ~Stage_InGameOptions() = default;
     virtual void DrawUI();
@@ -82,7 +108,7 @@ public:
 
 class Stage_TechTree : public ORStage
 {
-    ShellSetting Setting;
+    Stage_MainGame* Main{ nullptr };
 public:
     virtual ~Stage_TechTree() = default;
     virtual void DrawUI();
@@ -94,6 +120,9 @@ public:
 class Stage_MainGame : public ORStage
 {
     std::unique_ptr<RulesClass> Rules;
+    ORTileMap TileMap;
+
+    void InitTileMap();
 public:
     virtual ~Stage_MainGame() = default;
     virtual void DrawUI();
@@ -102,12 +131,17 @@ public:
     inline void InitRules(const ShellSetting& Setting)
     {
         Rules.reset(new RulesClass(Setting));
+        InitTileMap();
     }
     inline void InitRules(教程关Rules _)
     {
         Rules.reset(new RulesClass(_));
+        InitTileMap();
     }
     Stage_MainGame(const _UTF8 std::string_view StageName);
+    void Pause();
+    void Resume();
+    void ExitGame();
 };
 
 class PosSetHelper
