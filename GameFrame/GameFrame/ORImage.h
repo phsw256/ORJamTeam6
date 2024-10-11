@@ -3,6 +3,7 @@
 #include "Minimal.h"
 #define PNG_DEBUG 3
 #include <png.h>
+#include "ORLoadable.h"
 
 namespace ImGui
 {
@@ -42,6 +43,7 @@ public:
     inline bool Available() const { return OK; }
     bool Load(const char* pFileName);
     bool Load(ORReadStraw& Source);
+    ORLoadable_DefineLoader;
     ORImage() = default;
     ORImage(const ORImage&) = default;
     ORImage(ORImage&&) noexcept;

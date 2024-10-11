@@ -50,7 +50,7 @@ ORLoadable_DefineLoaderOuter(PropValue)
 ORLoadable_DefineLoaderOuter(TechTreeNode)
 {
     std::string ImgName;
-    Obj("Image", ImgName, LoadOrSkip{})("EffectValue", Value)("NameGroup", Name)("Position", Position);
+    Obj("Image", ImgName, LoadOrSkip{})("Era", EraName, LoadOrSkip{})("EffectValue", Value)("NameGroup", Name)("RelativePos", Position);
     Image = WorkSpace.ImagePool.GetResource(ImgName, WorkSpace.MissingImage);
 }
 
@@ -61,9 +61,22 @@ ORLoadable_DefineLoaderOuter(EraData)
 
 ORLoadable_DefineLoaderOuter(TechTree)
 {
-    Obj("Eras", Eras)("Nodes", Nodes);
+    Obj("Eras", Eras)("Nodes", Nodes)("InitialPos", NodeMap.GetDrawSetting().CenterMapPos)("SizeRatio", NodeMap.GetDrawSetting().SizeRatio);
     for (auto& p : Nodes)
     {
+        auto it=Eras.find(p.second->EraName);
+        if (it == Eras.end())p.second->pEra = nullptr;
+        else
+        {
+            p.second->pEra = &it->second;
+            p.second->Position.x += p.second->pEra->MapOffset.x;
+            p.second->Position.y += p.second->pEra->MapOffset.y;
+        }
         NodeMap.Insert(p.second->Position, p.second);
     }
+}
+
+void TechTree::DrawUI()
+{
+    NodeMap.DrawUI();
 }

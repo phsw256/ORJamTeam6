@@ -1,5 +1,7 @@
 #include "ORTest.h"
 #include "Global.h"
+#include "RoundData.h"
+#include "ORException.h"
 
 std::pair<DWORD, DWORD> MilliToMinSec(DWORD Milli)
 {
@@ -274,6 +276,11 @@ void Stage_MainGame::InitTileMap()
     Set.CenterMapPos = { 30,30 };
     Set.SizeRatio = { 128,64 };
 }
+void Stage_MainGame::InitTechTree()
+{
+    Tree = WorkSpace.TopBar.GetStage_Typed<Stage_TechTree>(u8"ø∆ºº ˜");
+    Tree->Init();
+}
 void Stage_MainGame::EventLoop()
 {
 
@@ -337,28 +344,64 @@ Stage_InGameOptions::Stage_InGameOptions(const _UTF8 std::string_view StageName)
 
 void Stage_TechTree::DrawUI()
 {
-    /*
-    if (ImGui::Button(u8"“Ø≤ªÕÊ¿±£°"))
-    {
-        WorkSpace.TopBar.ForceChangeStage(u8"÷˜≤Àµ•");
-    }
-    ImGui::Button(u8"",);
-    {
-        auto helper = PosSetHelper(WindowRelPos({ 0.4F,0.4F }));
-    }
-    ImGui::BeginListBox();
-    auto pImg=WorkSpace.ImagePool.GetResource("1232131");
-    pImg->Draw();
-    ImGui::ImageButton(pImg->GetID(), pImg->GetSize());
-    ImGui::GetBackgroundDrawList();
-    auto pGame = dynamic_cast<Stage_MainGame*>(WorkSpace.TopBar.GetStage(u8"”Œœ∑"));
-    if (pGame)pGame->InitRules(Setting);
-    */
     if (!Main)return;
     if (ImGui::Button(u8"∑µªÿ"))
     {
         Main->Resume();
         WorkSpace.TopBar.ForceChangeStage(u8"”Œœ∑");
+    }
+    int i = 0;
+    for (auto& op : Opts)
+    {
+        if (ImGui::Button(op.Name.c_str()))
+        {
+            CurOpt = i;
+        }
+        ImGui::SameLine();
+        i++;
+    }
+    auto pt = Opts[CurOpt].pTree;
+    auto& Set = pt->GetMap().GetDrawSetting();
+    Set.DrawBorder = ImRect(ImVec2{ 50.0F,150.0F }, ImGui::GetWindowSize() - ImVec2{ 50.0F, 80.0F });
+    Set.ProcessBorder = ImRect({ 0.0F,0.0F }, ImGui::GetWindowSize());
+    Set.DrawTarget = ImGui::GetBackgroundDrawList();
+    Set.CenterDrawPos = ImVec2{ 50.0F,150.0F };
+    //InvisibleArrow("1"); ImGui::SameLine();
+    //if (ImGui::ArrowButton("UP", ImGuiDir_Up))pt->GetMap().MoveView({ -0.2F,-0.2F });
+    if (ImGui::ArrowButton("LEFT", ImGuiDir_Left))pt->GetMap().MoveView({ -0.4F,0.0F });
+    ImGui::SameLine(); InvisibleArrow("2"); ImGui::SameLine();
+    if (ImGui::ArrowButton("RIGHT", ImGuiDir_Right))pt->GetMap().MoveView({ 0.4F,0.0F });
+    //InvisibleArrow("3"); ImGui::SameLine();
+    //if (ImGui::ArrowButton("DOWN", ImGuiDir_Down))pt->GetMap().MoveView({ 0.2F,0.2F });
+    if (Opts[CurOpt].BgCol.Value.w > 0.001)pt->GetMap().FillDrawArea(Opts[CurOpt].BgCol);
+    pt->DrawUI();
+}
+void Stage_TechTree::Init()
+{
+    try {
+        ORJsonSource ImageSrc;
+        ImageSrc.ParseFromFile(".\\Resources\\TutorialTech.json");
+        if (!ImageSrc.LoadObject(u8"Body_TechTree", BodyTechTree))throw ORException("ÃÂ÷  ˜‘ÿ»Î ß∞‹£°");
+        if (!ImageSrc.LoadObject(u8"Culture_TechTree", CulTechTree))throw ORException("ŒƒªØ ˜‘ÿ»Î ß∞‹£°");
+        if (!ImageSrc.LoadObject(u8"Science_TechTree", SciTechTree))throw ORException("ø∆ºº ˜‘ÿ»Î ß∞‹£°");
+        std::vector<ImColor> Colors;
+        if (ImageSrc.LoadObject(u8"Colors", Colors))
+            for (size_t i = 0; i < std::min(Colors.size(),std::size(Opts)); i++)
+                Opts[i].BgCol = Colors[i];
+        else throw ORException("±≥æ∞…´‘ÿ»Î ß∞‹£°");
+    }
+    catch (ORException& e)
+    {
+        MessageBoxW(MainWindowHandle, UTF8toUnicode(e.what()).c_str(), L" ˜‘ÿ»Î¥ÌŒÛ", MB_OK);
+        GlobalLog.AddLog_CurTime(false);
+        GlobalLog.AddLog(u8" ˜‘ÿ»Î¥ÌŒÛ");
+        GlobalLog.AddLog_CurTime(false);
+        GlobalLog.AddLog(e.what());
+        glfwSetWindowShouldClose(PreLink::window, 1);
+    }
+    for (auto& op : Opts)
+    {
+        auto& Set = op.pTree->GetMap().GetDrawSetting();
     }
 }
 void Stage_TechTree::EventLoop()
@@ -406,26 +449,28 @@ namespace ORTest
         AddEnabledStage<Stage_TechTree>(u8"ø∆ºº ˜");
 
         WorkSpace.TopBar.ForceChangeStage(u8"÷˜≤Àµ•");
-
-        WorkSpace.ImagePool.Emplace("Tile1", false, ".\\Resources\\Image\\Tile1.png", OriginAtCenter{});
-        WorkSpace.ImagePool.Emplace("Tile2", false, ".\\Resources\\Image\\Tile2.png", ImVec2{ -0.5F,-0.75F }, UseRelativePosition{});
-        WorkSpace.ImagePool.Emplace("Tile3", false, ".\\Resources\\Image\\Tile3.png", ImVec2{ -0.5F,-0.75F }, UseRelativePosition{});
-        WorkSpace.ImagePool.Emplace("Tile4", false, ".\\Resources\\Image\\Tile4.png", OriginAtCenter{});
-        WorkSpace.ImagePool.Emplace("MISSING", false, ".\\Resources\\Image\\Missing.png");
+        try{
+            ORJsonSource ImageSrc;
+            ImageSrc.ParseFromFile(".\\Resources\\Image.json");
+            if (!ImageSrc.LoadObject(WorkSpace.ImagePool))throw ORException("Õº∆¨≥ÿ‘ÿ»Î ß∞‹£°");
+        }
+        catch (ORException& e)
+        {
+            MessageBoxW(MainWindowHandle, UTF8toUnicode(e.what()).c_str(), L"Õº∆¨≥ÿ‘ÿ»Î¥ÌŒÛ", MB_OK);
+            GlobalLog.AddLog_CurTime(false);
+            GlobalLog.AddLog(u8"Õº∆¨≥ÿ‘ÿ»Î¥ÌŒÛ");
+            GlobalLog.AddLog_CurTime(false);
+            GlobalLog.AddLog(e.what());
+            glfwSetWindowShouldClose(PreLink::window, 1);
+        }
         WorkSpace.MissingImage = WorkSpace.ImagePool.GetResource("MISSING");
     }
     void Loop()
     {
-        /*
-        ImGui::SetNextWindowSize({ FontHeight * 30.0F,FontHeight * 60.0F });
-        ImGui::SetNextWindowPos({ 0.0F,FontHeight * 5.0F });
-        ImGui::SetNextWindowFocus();
-        ImGui::Begin("ORTest", nullptr, ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse );
-        WorkSpace.TopBar.DrawUI();
+        WorkSpace.TopBar.EventLoop();
+        //WorkSpace.TopBar.DrawUI();
         auto pStage = WorkSpace.TopBar.GetCurrentStage();
         if (pStage)pStage->DrawUI();
-        ImGui::End();
-        */
     }
     void CleanUp()
     {

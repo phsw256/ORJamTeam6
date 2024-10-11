@@ -2,6 +2,7 @@
 #include "ORComponent.h"
 #include "ORBackType.h"
 #include "ORGameMap.h"
+#include "RoundData.h"
 
 class ORStage_MusicPlayer;
 class Stage_MainMenu;
@@ -108,8 +109,19 @@ public:
 
 class Stage_TechTree : public ORStage
 {
+    struct Opt
+    {
+        TechTree* pTree;
+        std::string Name;
+        ImColor BgCol;
+    };
     Stage_MainGame* Main{ nullptr };
+    TechTree BodyTechTree, CulTechTree, SciTechTree;
+    Opt Opts[3] = { {&BodyTechTree, u8"体质"}, {&CulTechTree, u8"文化"}, {&SciTechTree, u8"科技"} };
+    int CurOpt{ 0 };
 public:
+    void Init();
+
     virtual ~Stage_TechTree() = default;
     virtual void DrawUI();
     virtual void EventLoop();
@@ -121,8 +133,10 @@ class Stage_MainGame : public ORStage
 {
     std::unique_ptr<RulesClass> Rules;
     ORIsoTileMap TileMap;
+    Stage_TechTree* Tree{ nullptr };
 
     void InitTileMap();
+    void InitTechTree();
 public:
     virtual ~Stage_MainGame() = default;
     virtual void DrawUI();
@@ -131,12 +145,12 @@ public:
     inline void InitRules(const ShellSetting& Setting)
     {
         Rules.reset(new RulesClass(Setting));
-        InitTileMap();
+        InitTileMap(); InitTechTree();
     }
     inline void InitRules(教程关Rules _)
     {
         Rules.reset(new RulesClass(_));
-        InitTileMap();
+        InitTileMap(); InitTechTree();
     }
     Stage_MainGame(const _UTF8 std::string_view StageName);
     void Pause();

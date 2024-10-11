@@ -62,9 +62,9 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 
     GlobalLog.ClearLog();
     GlobalLog.AddLog_CurTime(false);
-    GlobalLog.AddLog(("INI浏览器 V" + Version).c_str());
+    GlobalLog.AddLog((u8"INI浏览器 V" + Version).c_str());
     GlobalLog.AddLog_CurTime(false);
-    GlobalLog.AddLog("INI浏览器已开始运行。");
+    GlobalLog.AddLog(u8"INI浏览器已开始运行。");
 
     FontLoaded.store(false);
 
@@ -88,10 +88,10 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     if (EnableLog)
     {
         GlobalLog.AddLog_CurTime(false);
-        GlobalLog.AddLog("设置随机数引擎。");
+        GlobalLog.AddLog(u8"设置随机数引擎。");
 
         GlobalLog.AddLog_CurTime(false);
-        GlobalLog.AddLog(("读入输入参数 X=" + std::to_string(ScrX) + " Y=" + std::to_string(ScrY)).c_str());
+        GlobalLog.AddLog((u8"读入输入参数 X=" + std::to_string(ScrX) + u8" Y=" + std::to_string(ScrY)).c_str());
     }
 
     char DesktopTmp[300];
@@ -111,7 +111,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     if (EnableLog)
     {
         GlobalLog.AddLog_CurTime(false);
-        GlobalLog.AddLog("渲染初始化完成。");
+        GlobalLog.AddLog(u8"渲染初始化完成。");
     }
 
     PreLoop2();

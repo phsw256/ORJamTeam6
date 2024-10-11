@@ -1,6 +1,7 @@
 #include "ORImage.h"
 #include "ORException.h"
 #include "ORFile.h"
+#include "Global.h"
 #include <imgui.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
@@ -65,6 +66,35 @@ bool ORImage::Load(ORReadStraw& Source)
     }
     OK = (TexID != 0);
     return OK;
+}
+ORLoadable_DefineLoaderOuter(ORImage)
+{
+    std::string Path;
+    bool Relative, Center;
+    Obj("Path", Path)("Delta", DrawDelta, { 0.0F,0.0F })("DeltaRelative", Relative, false)("Centered", Center, false);
+    Load(Path.c_str());
+    /*
+    sprintf_s(LogBuf, "Path=\"%s\"", Path.c_str());
+    GlobalLog.AddLog_CurTime(false);
+    GlobalLog.AddLog(LogBuf);
+    auto s = StrBoolImpl(Relative, StrBoolType::Str_true_false);
+    auto p = Obj.GetObjectItem("DeltaRelative").GetRaw();
+    sprintf_s(LogBuf, "Orig Delta=(%f,%f), Relative=%s(%d)", DrawDelta.x, DrawDelta.y, s.c_str(), p?p->type:-1);
+    GlobalLog.AddLog_CurTime(false);
+    GlobalLog.AddLog(LogBuf);
+    */
+    if (Center)
+        DrawDelta = GetSize() * ImVec2 { -0.5F, -0.5F };
+    else if (Relative)
+        DrawDelta *= GetSize();
+   /*
+    s = StrBoolImpl(Center, StrBoolType::Str_true_false);
+    p = Obj.GetObjectItem("Centered").GetRaw();
+    sprintf_s(LogBuf, "Delta=(%f,%f),Size=(%d,%d),Center=%s(%d)", DrawDelta.x, DrawDelta.y,
+        TextureData.width, TextureData.height, s.c_str(), p ? p->type : -1);
+    GlobalLog.AddLog_CurTime(false);
+    GlobalLog.AddLog(LogBuf);
+   */
 }
 ORImage::ORImage(ORImage&& rhs) noexcept:TextureData(rhs.TextureData), TexID(rhs.TexID), OK(rhs.OK)
 {

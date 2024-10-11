@@ -66,8 +66,18 @@ BytePointerArray ORStaticStraw::ReadWhole(size_t ReservedBytes)
 {
     if (!Available())return BytePointerArray{ 0,nullptr };
     BytePointerArray Result;
-    Result.Alloc(GetSize() + ReservedBytes);
-    Result.N = Get(Result.Data, Result.N) + ReservedBytes;
+    auto Size = GetSize();
+    Result.Alloc(Size + ReservedBytes);
+    Result.N = Get(Result.Data, Size) + ReservedBytes;
+    return Result;
+}
+std::string ORStaticStraw::ReadWholeAsString(size_t ReservedCapacity)
+{
+    if (!Available())return "";
+    std::string Result;
+    auto Size = GetSize();
+    Result.resize(Size + ReservedCapacity);
+    Result.resize(Get(Result.data(), Size));
     return Result;
 }
 

@@ -62,6 +62,7 @@ public:
     inline std::string GetName() const { return Object->string; }
     JsonObject GetObjectItem(const std::string& Str) const;
     JsonObject GetObjectItem(const std::string_view Str) const;
+    JsonObject GetObjectItem(const char* Str) const;
 
     inline bool HasItem(const std::string& Str) const { return GetObjectItem(Str).Available(); }
     

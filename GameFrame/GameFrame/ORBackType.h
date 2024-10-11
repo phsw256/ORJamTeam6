@@ -18,10 +18,9 @@
  *     F£ºº¯Êý       SF£º¾²Ì¬º¯Êý       VF£ºÐéº¯Êý     PVF£º´¿Ðéº¯Êý
  */
 #pragma once
-#include "ExtJson.h"
-#include "ORFile.h"
 #include "Include.h"
 #include "MusicMCI.h"
+#include "ORLoadable.h"
 
 
 
@@ -202,6 +201,10 @@ public:
     void Clear()
     {
         Pool.clear();
+    }
+    ORLoadable_DefineLoader
+    {
+        Obj("Resources",Pool);
     }
 };
 

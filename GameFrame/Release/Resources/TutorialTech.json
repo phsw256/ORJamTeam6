@@ -1,0 +1,135 @@
+{
+    "Body_TechTree": {
+        "InitialPos": [ 0, 0 ],
+        "SizeRatio": [ 300, 300 ],
+        "Eras": {
+            "E1": {
+                "NameGroup": {
+                    "Name": "1",
+                    "Description": "2",
+                    "Hint": "3"
+                },
+                "Position": [ 0, 0 ]
+            }
+        },
+        "Nodes": {
+            "A": {
+                "NameGroup": {
+                    "Name": "A1",
+                    "Description": "A2",
+                    "Hint": "A3"
+                },
+                "Image": "1", //如果无效自动调用MISSING
+                "Era": "E1",
+                "EffectValue": {
+                    "Tech": -1.0,
+                    "Body": -1.0,
+                    "Culture": -2
+                },
+                "RelativePos": {
+                    "X": 0,
+                    "Y": 0,
+                    "ZOrder": 0,
+                    "ZOffset": 0 //只有ZOffset的单位是屏幕像素
+                }
+            },
+            "B": {
+                "NameGroup": {
+                    "Name": "A1",
+                    "Description": "A2",
+                    "Hint": "A3"
+                },
+                "Image": "Tile1", //如果无效自动调用MISSING
+                "Era": "E1",
+                "EffectValue": {
+                    "Tech": -1.0,
+                    "Body": -1.0,
+                    "Culture": -2
+                },
+                "RelativePos": {
+                    "X": 1,
+                    "Y": 1,
+                    "ZOrder": 0,
+                    "ZOffset": 0 //只有ZOffset的单位是屏幕像素
+                }
+            }
+        }
+    },
+    "Culture_TechTree": {
+        "InitialPos": [ 0, 0 ],
+        "SizeRatio": [ 300, 300 ],
+        "Eras": {
+            "E1": {
+                "NameGroup": {
+                    "Name": "1",
+                    "Description": "2",
+                    "Hint": "3"
+                },
+                "Position": [ 0, 0 ]
+            }
+        },
+        "Nodes": {
+            "A": {
+                "NameGroup": {
+                    "Name": "A1",
+                    "Description": "A2",
+                    "Hint": "A3"
+                },
+                "Image": "1", //如果无效自动调用MISSING
+                "Era": "E1",
+                "EffectValue": {
+                    "Tech": -1.0,
+                    "Body": -1.0,
+                    "Culture": -2
+                },
+                "RelativePos": {
+                    "X": 0,
+                    "Y": 0,
+                    "ZOrder": 0,
+                    "ZOffset": 0 //只有ZOffset的单位是屏幕像素
+                }
+            }
+        }
+    },
+    "Science_TechTree": {
+        "InitialPos": [ 0, 0 ],
+        "SizeRatio": [ 200, 200 ],
+        "Eras": {
+            "E1": {
+                "NameGroup": {
+                    "Name": "1",
+                    "Description": "2",
+                    "Hint": "3"
+                },
+                "Position": [ 0, 0 ]
+            }
+        },
+        "Nodes": {
+            "A": {
+                "NameGroup": {
+                    "Name": "A1",
+                    "Description": "A2",
+                    "Hint": "A3"
+                },
+                "Image": "1", //如果无效自动调用MISSING
+                "Era": "E1",
+                "EffectValue": {
+                    "Tech": -1.0,
+                    "Body": -1.0,
+                    "Culture": -2
+                },
+                "RelativePos": {
+                    "X": 0,
+                    "Y": 0,
+                    "ZOrder": 0,
+                    "ZOffset": 0 //只有ZOffset的单位是屏幕像素
+                }
+            }
+        }
+    },
+    "Colors": [
+        { "RGBA": [ 255, 255, 255, 200 ] },
+        { "RGB": [ 252, 135, 154 ] },
+        { "KA": [ 25, 60 ] }
+}
+    ]

@@ -53,6 +53,7 @@ public:
     virtual void Close() = 0;
     virtual size_t GetSize() = 0;
     BytePointerArray ReadWhole(size_t ReservedBytes);
+    std::string ReadWholeAsString(size_t ReservedCapacity);
     ORStaticStraw() = default;
     ORStaticStraw(const ORStaticStraw&) = delete;
     ORStaticStraw(ORStaticStraw&&) = default;

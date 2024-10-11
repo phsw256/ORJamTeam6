@@ -38,10 +38,8 @@ void ControlPanel()
     ImGui::Text(u8"Æ½¾ùFPS %.1f", ImGui::GetIO().Framerate);
     if (ImGui::IsItemHovered())Mg1.SetDesc(u8"FUCK");
 
-    WorkSpace.TopBar.EventLoop();
-    //WorkSpace.TopBar.DrawUI();
-    auto pStage = WorkSpace.TopBar.GetCurrentStage();
-    if (pStage)pStage->DrawUI();
+    //TEST 23/03/18
+    ORTest::Loop();
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImVec4)(ImColor(0x7F7F7F)));
     //Mg1.DrawUI();
@@ -52,8 +50,7 @@ void ControlPanel()
 
     ImGui::End();//*/
 
-    //TEST 23/03/18
-    ORTest::Loop();
+    
 
     /*
     static bool pp = true;

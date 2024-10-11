@@ -94,6 +94,7 @@ public:
     inline const ORTileMapSetting& GetDrawSetting()const { return Setting; }
     inline ORTileMapSetting& GetDrawSetting() { return Setting; }
     void DrawUI();
+    void FillDrawArea(ImU32 Col);
     inline void SetView(ImVec2 NewMapPos) { Setting.CenterMapPos = NewMapPos; }
     inline void MoveView(ImVec2 NewMapPos) { Setting.CenterMapPos += NewMapPos; }
     inline void MoveViewX(float XDelta) { Setting.CenterMapPos.x += XDelta; }
@@ -108,6 +109,13 @@ using ORClickableIsoTileMap = ORTileMap<ORIsoTileTraits<true>>;
 using ORClickablePlainTileMap = ORTileMap<ORPlainTileTraits<true>>;
 
 bool ContainPart(ImRect Border, ImRect Obj);
+
+template<typename TileTrait>
+void ORTileMap<TileTrait>::FillDrawArea(ImU32 Col)
+{
+    if (!Setting.DrawTarget)return;
+    Setting.DrawTarget->AddRectFilled(Setting.DrawBorder.Min, Setting.DrawBorder.Max, Col);
+}
 
 template<typename TileTrait>
 void ORTileMap<TileTrait>::DrawUI()//With Update Tiles

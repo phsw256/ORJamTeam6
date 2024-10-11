@@ -1,8 +1,10 @@
 #pragma once
 #include "ExtJson.h"
+#include "ORFile.h"
 #include "Minimal.h"
 #include <functional>
 #include <imgui.h>
+#include "ORException.h"
 
 class LoadOrSkip {};
 
@@ -31,6 +33,21 @@ public:
     ORJsonLoader(JsonObject _) :JsonObject(_), Success(true) {}
 };
 
+/*
+ParseFromFile会抛异常，接着点！
+*/
+class ORJsonSource:public JsonFile
+{
+public:
+    inline void ParseFromFile(ORStaticStraw& Src);
+    inline void ParseFromFile(const std::string_view Name);
+    inline ORJsonLoader GetLoader() const;
+    template<typename T>
+    inline bool LoadObject(T& Obj);
+    template<typename T>
+    inline bool LoadObject(const std::string_view Name, T& Obj);
+};
+
 template<typename T>
 concept ClassLoadable = requires(ORJsonLoader & Obj, T & V)
 {
@@ -40,10 +57,6 @@ template<typename T>
 concept MapLoadable = !(std::same_as<T, int> || std::same_as<T, double> || std::same_as<T, bool> || std::same_as<T, std::string> || std::same_as <T, JsonObject>);
 template<typename T>
 concept VectorLoadable = !(std::same_as<T, int> || std::same_as<T, double> || std::same_as<T, uint8_t> || std::same_as<T, std::string> || std::same_as <T, JsonObject>);
-//template<typename T>
-//concept HasValueType = requires() { T::value_type; };
-//template<typename T>
-//concept HasMappedType = requires {T::mapped_type; };
 template<typename T>
 concept MapClassLoadable = MapLoadable<typename T::mapped_type> && std::same_as<T, std::unordered_map<std::string, typename T::mapped_type>>;
 template<typename T>
@@ -70,16 +83,51 @@ void BasicTypeLoad(ORJsonLoader& Obj, T& Val)
 };
 
 template<>
-void BasicTypeLoad<JsonObject>(ORJsonLoader& Obj, JsonObject& Val)
+inline void BasicTypeLoad<JsonObject>(ORJsonLoader& Obj, JsonObject& Val)
 {
     Val = (JsonObject)Obj;
 }
 
 template<>
-void BasicTypeLoad<ImVec2>(ORJsonLoader& Obj, ImVec2& Val)
+inline void BasicTypeLoad<ImVec2>(ORJsonLoader& Obj, ImVec2& Val)
 {
-    Val.x = Obj.GetFloat();
-    Val.y = Obj.GetFloat();
+    Val.x = Obj.GetArrayItem(0).GetFloat();
+    Val.y = Obj.GetArrayItem(1).GetFloat();
+}
+
+template<>
+inline void BasicTypeLoad<ImColor>(ORJsonLoader& Obj, ImColor& Val)
+{
+    if (Obj.IsTypeNull())
+    {
+        Val = ImColor(0, 0, 0, 0);
+        return;
+    }
+    auto O = Obj.GetObjectItem("RGB");
+    if (O.Available())
+    {
+        auto V = O.GetArrayInt();
+        if (V.size() < 3)Obj.Success = false;
+        else Val = ImColor(V[0], V[1], V[2]);
+        return;
+    }
+    O = Obj.GetObjectItem("RGBA");
+    if (O.Available())
+    {
+        auto V = O.GetArrayInt();
+        if (V.size() < 4)Obj.Success = false;
+        else Val = ImColor(V[0], V[1], V[2], V[3]);
+        return;
+    }
+    O = Obj.GetObjectItem("KA");
+    if (O.Available())
+    {
+        auto V = O.GetArrayInt();
+        if (V.size() < 2)Obj.Success = false;
+        else Val = ImColor(V[0], V[0], V[0], V[1]);
+        return;
+    }
+    Obj.Success = false;
 }
 
 template<SPtrClassLoadable T>
@@ -117,7 +165,7 @@ void BasicTypeLoad(ORJsonLoader& Obj, T& Val)
 
 #define BasicTypeLoad_Specialize(T, Fn) \
 template<>\
-void BasicTypeLoad< T >(ORJsonLoader& Obj, T & Val)\
+inline void BasicTypeLoad< T >(ORJsonLoader& Obj, T & Val)\
 { Val = std::move(Obj. ## Fn ()); }
 BasicTypeLoad_Specialize(int, GetInt)
 BasicTypeLoad_Specialize(float, GetFloat)
@@ -135,7 +183,7 @@ BasicTypeLoad_Specialize(unordered_map_str<bool>, GetMapBool)
 BasicTypeLoad_Specialize(unordered_map_str<std::string>, GetMapString)
 BasicTypeLoad_Specialize(unordered_map_str<JsonObject>, GetMapObject)
 
-JsonObject ORJsonLoader::PreCalcItem(const std::string_view Item)
+inline JsonObject ORJsonLoader::PreCalcItem(const std::string_view Item)
 {
     if (!Success)return NullJsonObject;
     if (!Available())Success = false;
@@ -158,6 +206,7 @@ inline ORJsonLoader& ORJsonLoader::operator()(const std::string_view Item, T& Ob
         if (!L.Success)
             Success = Success && DefaultPolicy(Obj);
     }
+    else Success = DefaultPolicy(Obj);
     return *this;
 }
 template<typename T>
@@ -170,6 +219,11 @@ inline ORJsonLoader& ORJsonLoader::operator()(const std::string_view Item, T& Ob
         BasicTypeLoad<T>(L, Obj);
         if (!L.Success)
             Obj = Default;
+    }
+    else
+    {
+        Obj = Default;
+        Success = true;
     }
     return *this;
 }
@@ -197,6 +251,39 @@ inline ORJsonLoader& ORJsonLoader::operator()(const std::string_view Item, T& Ob
     return *this;
 }
 
+template<typename T>
+inline bool ORJsonSource::LoadObject(T& Obj)
+{
+    ORJsonLoader Loader = GetLoader();
+    BasicTypeLoad(Loader, Obj);
+    return Loader.Success;
+}
+template<typename T>
+inline bool ORJsonSource::LoadObject(const std::string_view Item, T& Obj)
+{
+    ORJsonLoader Loader = GetLoader();
+    ORJsonLoader L = Loader.GetObjectItem(Item);
+    if (!L.Available())return false;
+    BasicTypeLoad(L, Obj);
+    return Loader.Success;
+}
+
+inline void ORJsonSource::ParseFromFile(ORStaticStraw& Src)
+{
+    auto Str = Src.ReadWholeAsString(0);
+    if (Str.empty()) throw (ORException(u8"ORJsonSource::ParseFromFile未获取到字符串！"));
+    auto Err = ParseTmpChecked(std::move(Str), u8"<- 错误位置 ->");
+    if (!Err.empty()) throw (ORException(std::move(Err)));
+}
+inline void ORJsonSource::ParseFromFile(const std::string_view Name)
+{
+    auto st = ORExtFileStraw(Name);
+    ParseFromFile(st);
+}
+inline ORJsonLoader ORJsonSource::GetLoader() const
+{
+    return ORJsonLoader(GetObj());
+}
 
 #define ORLoadable_DefineLoader void Load(ORJsonLoader& Obj)
 #define ORLoadable_DefineLoaderOuter(Type) void Type ## ::Load(ORJsonLoader& Obj)

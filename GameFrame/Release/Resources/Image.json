@@ -1,0 +1,25 @@
+{
+    "Resources": {
+        "MISSING": {//硬编码的，不要动
+            "Path": ".\\Resources\\Image\\Missing.png"
+        },
+        "Tile1": {
+            "Path": ".\\Resources\\Image\\Tile1.png",
+            "Centered": true
+        },
+        "Tile2": {
+            "Path": ".\\Resources\\Image\\Tile2.png",
+            "Delta": [ -0.5, -0.75 ],
+            "DeltaRelative": true
+        },
+        "Tile3": {
+            "Path": ".\\Resources\\Image\\Tile3.png",
+            "Delta": [ -0.5, -0.75 ],
+            "DeltaRelative": true
+        },
+        "Tile4": {
+            "Path": ".\\Resources\\Image\\Tile4.png",
+            "Centered": true
+        }
+    }
+}

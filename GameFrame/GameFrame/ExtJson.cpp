@@ -116,7 +116,11 @@ JsonObject JsonObject::GetObjectItem(const std::string_view Str) const
     auto pObj = cJSON_GetObjectItem(Object, Str.data());
     return { pObj };
 }
-
+JsonObject JsonObject::GetObjectItem(const char* Str) const
+{
+    auto pObj = cJSON_GetObjectItem(Object, Str);
+    return { pObj };
+}
 std::string JsonObject::GetText() const
 {
     char* CStr = cJSON_Print(Object);

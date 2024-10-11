@@ -43,18 +43,21 @@ PropValue operator+(const PropValue&, const PropDelta&);
 PropDelta operator+(const PropDelta&, const PropDelta&);
 
 template<>
-void BasicTypeLoad<ORDrawPosition>(ORJsonLoader& Obj, ORDrawPosition& Val)
+inline void BasicTypeLoad<ORDrawPosition>(ORJsonLoader& Obj, ORDrawPosition& Val)
 {
     Obj("X", Val.x, 0.0F)("Y", Val.y, 0.0F)("ZOrder", Val.ZOrder, 0.0F)("ZOffset", Val.ZDrawOffset, 0.0F);
 }
+
+
 class EraData;
 class TechTreeNode :public ORDrawableTile
 {
 private:
     HintedName Name;
     PropDelta Value;
-    EraData* pEra;
 public:
+    std::string EraName;
+    EraData* pEra;
     ORDrawPosition Position;
 
     TechTreeNode() :ORDrawableTile(NoInit{}) {}
@@ -77,6 +80,8 @@ class TechTree
     std::unordered_map<std::string, ORResPtr<TechTreeNode>> Nodes;
 public:
     ORLoadable_DefineLoader;
+    void DrawUI();
+    ORClickablePlainTileMap& GetMap() { return NodeMap; }
 };
 
 class RoundCache
