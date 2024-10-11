@@ -25,3 +25,4 @@ using ORResPtr = std::shared_ptr<T>;
 
 class UseRelativePosition {};
 class OriginAtCenter {};
+class NoInit {};

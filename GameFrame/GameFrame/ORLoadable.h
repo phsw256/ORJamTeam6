@@ -1,6 +1,8 @@
 #pragma once
 #include "ExtJson.h"
+#include "Minimal.h"
 #include <functional>
+#include <imgui.h>
 
 class LoadOrSkip {};
 
@@ -35,9 +37,23 @@ concept ClassLoadable = requires(ORJsonLoader & Obj, T & V)
     { V.Load(Obj) } -> std::same_as<void>;
 };
 template<typename T>
-concept NotClassLoadable = !ClassLoadable<T>;
-
-
+concept MapLoadable = !(std::same_as<T, int> || std::same_as<T, double> || std::same_as<T, bool> || std::same_as<T, std::string> || std::same_as <T, JsonObject>);
+template<typename T>
+concept VectorLoadable = !(std::same_as<T, int> || std::same_as<T, double> || std::same_as<T, uint8_t> || std::same_as<T, std::string> || std::same_as <T, JsonObject>);
+//template<typename T>
+//concept HasValueType = requires() { T::value_type; };
+//template<typename T>
+//concept HasMappedType = requires {T::mapped_type; };
+template<typename T>
+concept MapClassLoadable = MapLoadable<typename T::mapped_type> && std::same_as<T, std::unordered_map<std::string, typename T::mapped_type>>;
+template<typename T>
+concept VectorClassLoadable = VectorLoadable<typename T::value_type> && std::same_as<T, std::vector<typename T::value_type>>;
+template<typename T>
+concept SPtrClassLoadable = std::same_as<T, std::shared_ptr<typename T::element_type>>;
+template<typename T>
+concept UPtrClassLoadable = std::same_as<T, std::unique_ptr<typename T::element_type>>;
+template<typename T>
+concept NotClassLoadable = !(ClassLoadable<T> || MapClassLoadable<T> || VectorClassLoadable<T> || SPtrClassLoadable<T> || UPtrClassLoadable<T>);
 /*
 Load函数满足Obj.Available()==true保证
 */
@@ -50,7 +66,7 @@ void BasicTypeLoad(ORJsonLoader& Obj, T& Val)
 template<NotClassLoadable T>
 void BasicTypeLoad(ORJsonLoader& Obj, T& Val)
 {
-    static_assert(false, "缺少载入的模板！");
+    static_assert(false, "BasicTypeLoad缺少载入的模板！");
 };
 
 template<>
@@ -59,12 +75,50 @@ void BasicTypeLoad<JsonObject>(ORJsonLoader& Obj, JsonObject& Val)
     Val = (JsonObject)Obj;
 }
 
+template<>
+void BasicTypeLoad<ImVec2>(ORJsonLoader& Obj, ImVec2& Val)
+{
+    Val.x = Obj.GetFloat();
+    Val.y = Obj.GetFloat();
+}
+
+template<SPtrClassLoadable T>
+void BasicTypeLoad(ORJsonLoader& Obj, T& Val)
+{
+    if (!Val)Val.reset(new T::element_type);
+    BasicTypeLoad(Obj, *Val);
+}
+
+template<VectorClassLoadable T>
+void BasicTypeLoad(ORJsonLoader& Obj, T& Val)
+{
+    std::vector<JsonObject> Arr = Obj.GetArrayObject();
+    for (auto& p : Arr)
+    {
+        ORJsonLoader L(p);
+        Val.emplace_back();
+        BasicTypeLoad<typename T::value_type>(L, Val.back());
+        Obj.Success == Obj.Success && L.Success;
+    }
+}
+template<typename T>
+using unordered_map_str = std::unordered_map<std::string, T>;
+template<MapClassLoadable T>
+void BasicTypeLoad(ORJsonLoader& Obj, T& Val)
+{
+    auto Map = Obj.GetMapObject();
+    for (auto& p : Map)
+    {
+        ORJsonLoader L(p.second);
+        BasicTypeLoad<typename T::mapped_type>(L, Val[p.first]);
+        Obj.Success == Obj.Success && L.Success;
+    }
+}
+
 #define BasicTypeLoad_Specialize(T, Fn) \
 template<>\
 void BasicTypeLoad< T >(ORJsonLoader& Obj, T & Val)\
 { Val = std::move(Obj. ## Fn ()); }
-template<typename T>
-using unordered_map_str = std::unordered_map<std::string, T>;
 BasicTypeLoad_Specialize(int, GetInt)
 BasicTypeLoad_Specialize(float, GetFloat)
 BasicTypeLoad_Specialize(double, GetDouble)
@@ -100,7 +154,7 @@ inline ORJsonLoader& ORJsonLoader::operator()(const std::string_view Item, T& Ob
     if (J.Available())
     {
         ORJsonLoader L(J);
-        BasicTypeLoad<T>(*this, L);
+        BasicTypeLoad<T>(L, Obj);
         if (!L.Success)
             Success = Success && DefaultPolicy(Obj);
     }
@@ -130,7 +184,6 @@ inline ORJsonLoader& ORJsonLoader::operator()(const std::string_view Item, T& Ob
     }
     return *this;
 }
-
 template<typename T>
 inline ORJsonLoader& ORJsonLoader::operator()(const std::string_view Item, T& Obj)
 {
@@ -143,6 +196,7 @@ inline ORJsonLoader& ORJsonLoader::operator()(const std::string_view Item, T& Ob
     }
     return *this;
 }
+
 
 #define ORLoadable_DefineLoader void Load(ORJsonLoader& Obj)
 #define ORLoadable_DefineLoaderOuter(Type) void Type ## ::Load(ORJsonLoader& Obj)

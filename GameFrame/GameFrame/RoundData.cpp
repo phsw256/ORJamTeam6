@@ -4,13 +4,17 @@
 
 PropDelta& PropDelta::operator+=(const PropDelta& rhs)
 {
-    Value += rhs.Value;
+    Tech += rhs.Tech;
+    Cult += rhs.Cult;
+    Body += rhs.Body;
     return *this;
 }
 
 PropValue& PropValue::operator+=(const PropDelta& rhs)
 {
-    Value += rhs.Value;
+    Tech += rhs.Tech;
+    Cult += rhs.Cult;
+    Body += rhs.Body;
     return *this;
 }
 
@@ -35,12 +39,12 @@ ORLoadable_DefineLoaderOuter(HintedName)
 
 ORLoadable_DefineLoaderOuter(PropDelta)
 {
-    Obj("Value", Value, 0);
+    Obj("Tech", Tech, 0.0)("Body", Body, 0.0)("Culture", Cult, 0.0);
 }
 
 ORLoadable_DefineLoaderOuter(PropValue)
 {
-    Obj("Value", Value, 0);
+    Obj("Tech", Tech, 0.0)("Body", Body, 0.0)("Culture", Cult, 0.0);
 }
 
 ORLoadable_DefineLoaderOuter(TechTreeNode)
@@ -48,4 +52,18 @@ ORLoadable_DefineLoaderOuter(TechTreeNode)
     std::string ImgName;
     Obj("Image", ImgName, LoadOrSkip{})("EffectValue", Value)("NameGroup", Name)("Position", Position);
     Image = WorkSpace.ImagePool.GetResource(ImgName, WorkSpace.MissingImage);
+}
+
+ORLoadable_DefineLoaderOuter(EraData)
+{
+    Obj("NameGroup", Name)("Position", MapOffset);
+}
+
+ORLoadable_DefineLoaderOuter(TechTree)
+{
+    Obj("Eras", Eras)("Nodes", Nodes);
+    for (auto& p : Nodes)
+    {
+        NodeMap.Insert(p.second->Position, p.second);
+    }
 }

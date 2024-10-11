@@ -27,6 +27,7 @@ protected:
 public:
     inline ORResPtr<ORImage>& GetImage() { return Image; }
     ORDrawableTile() = delete;
+    ORDrawableTile(NoInit) {}
     ORDrawableTile(ORResPtr<ORImage> Img) :Image(Img) {}
     virtual ~ORDrawableTile() = default;
     virtual void DrawUI();
@@ -84,7 +85,6 @@ class ORTileMap
     using Compare = typename TileTrait::Compare;
 protected:
     ORTileMapSetting Setting;
-    ImVec2 MapSize;
     std::multimap<ORDrawPosition, ORResPtr<ORDrawableTile>, Compare>Tiles;
 public:
     using TileIter = typename std::multimap<ORDrawPosition, ORResPtr<ORDrawableTile>, Compare>::iterator;
@@ -98,6 +98,7 @@ public:
     inline void MoveView(ImVec2 NewMapPos) { Setting.CenterMapPos += NewMapPos; }
     inline void MoveViewX(float XDelta) { Setting.CenterMapPos.x += XDelta; }
     inline void MoveViewY(float YDelta) { Setting.CenterMapPos.y += YDelta; }
+    inline void Insert(ORDrawPosition Pos, ORResPtr<ORDrawableTile> Ptr) { Tiles.insert({ Pos,Ptr }); }
     void RandomGenerate(int X,int Y, ORResourcePool<ORImage>& Pool, const std::vector<std::string>& SelectList);
 };
 

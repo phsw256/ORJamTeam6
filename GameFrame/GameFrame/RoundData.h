@@ -23,14 +23,18 @@ struct HintedName
 
 struct PropDelta
 {
-    int Value;
+    double Tech;
+    double Body;
+    double Cult;
     PropDelta& operator+=(const PropDelta&);
     ORLoadable_DefineLoader;
 };
 
 struct PropValue
 {
-    int Value;
+    double Tech;
+    double Body;
+    double Cult;
     PropValue& operator+=(const PropDelta&);
     ORLoadable_DefineLoader;
 };
@@ -43,13 +47,34 @@ void BasicTypeLoad<ORDrawPosition>(ORJsonLoader& Obj, ORDrawPosition& Val)
 {
     Obj("X", Val.x, 0.0F)("Y", Val.y, 0.0F)("ZOrder", Val.ZOrder, 0.0F)("ZOffset", Val.ZDrawOffset, 0.0F);
 }
-
+class EraData;
 class TechTreeNode :public ORDrawableTile
 {
 private:
-    PropDelta Value;
     HintedName Name;
+    PropDelta Value;
+    EraData* pEra;
+public:
     ORDrawPosition Position;
+
+    TechTreeNode() :ORDrawableTile(NoInit{}) {}
+    ORLoadable_DefineLoader;
+    const std::string& GetName() const { return Name.Name; }
+};
+
+class EraData
+{
+public:
+    HintedName Name;
+    ImVec2 MapOffset;
+    ORLoadable_DefineLoader;
+};
+
+class TechTree
+{
+    std::unordered_map<std::string, EraData> Eras;
+    ORClickablePlainTileMap NodeMap;
+    std::unordered_map<std::string, ORResPtr<TechTreeNode>> Nodes;
 public:
     ORLoadable_DefineLoader;
 };
