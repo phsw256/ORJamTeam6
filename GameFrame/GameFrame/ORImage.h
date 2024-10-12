@@ -31,6 +31,8 @@ private:
     GLuint TexID{ 0 };
     bool OK{ false };
     ImVec2 DrawDelta;
+    ImVec2 ClipMin{ 0.0F,0.0F };
+    ImVec2 ClipMax{ 1.0F,1.0F };
 public:
     inline void SetDelta(ImVec2 Delta) { DrawDelta = Delta; }
     inline ImVec2 GetDelta() const { return DrawDelta; }
@@ -38,8 +40,13 @@ public:
     inline ImTextureID GetID() const { return ((ImTextureID)TexID); }
     inline int GetWidth() const { return TextureData.width; }
     inline int GetHeight() const { return TextureData.height; }
+    inline ImVec2 GetClipMin() const { return ClipMin; }
+    inline ImVec2 GetClipMax() const { return ClipMax; }
+    inline void ResetClip(ImVec2 Min = { 0.0F,0.0F }, ImVec2 Max = { 1.0F,1.0F }) { ClipMin = Min; ClipMax = Max; }
     void DrawChecked();
     bool Draw() noexcept;
+    void DrawCheckedAt(ImDrawList& List, ImVec2 Pos);
+    bool DrawAt(ImDrawList& List, ImVec2 Pos);
     inline bool Available() const { return OK; }
     bool Load(const char* pFileName);
     bool Load(ORReadStraw& Source);

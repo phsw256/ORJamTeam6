@@ -5,6 +5,7 @@
 #include <functional>
 #include <imgui.h>
 #include "ORException.h"
+#include "ORTimer.h"
 
 class LoadOrSkip {};
 
@@ -86,6 +87,36 @@ template<>
 inline void BasicTypeLoad<JsonObject>(ORJsonLoader& Obj, JsonObject& Val)
 {
     Val = (JsonObject)Obj;
+}
+
+template<>
+inline void BasicTypeLoad<ETimer::dura_t>(ORJsonLoader& Obj, ETimer::dura_t& Val)
+{
+    auto O = Obj.GetObjectItem("second");
+    if (O.Available())
+    {
+        Val = std::chrono::seconds((int64_t)O.GetInt());
+        return;
+    }
+    O = Obj.GetObjectItem("milli");
+    if (O.Available())
+    {
+        Val = std::chrono::milliseconds((int64_t)O.GetInt());
+        return;
+    }
+    O = Obj.GetObjectItem("micro");
+    if (O.Available())
+    {
+        Val = std::chrono::microseconds((int64_t)O.GetInt());
+        return;
+    }
+    O = Obj.GetObjectItem("nano");
+    if (O.Available())
+    {
+        Val = std::chrono::nanoseconds((int64_t)O.GetInt());
+        return;
+    }
+    Obj.Success = false;
 }
 
 template<>
@@ -183,9 +214,16 @@ void BasicTypeLoad(ORJsonLoader& Obj, T& Val)
 template<>\
 inline void BasicTypeLoad< T >(ORJsonLoader& Obj, T & Val)\
 { Val = std::move(Obj. ## Fn ()); }
-BasicTypeLoad_Specialize(int, GetInt)
-BasicTypeLoad_Specialize(float, GetFloat)
-BasicTypeLoad_Specialize(double, GetDouble)
+#define BasicTypeLoad_PlainSpecialize(T, Fn) \
+template<>\
+inline void BasicTypeLoad< T >(ORJsonLoader& Obj, T & Val)\
+{ Val = ( T ) Obj. ## Fn (); }
+BasicTypeLoad_PlainSpecialize(int, GetInt)
+BasicTypeLoad_PlainSpecialize(unsigned, GetInt)
+BasicTypeLoad_PlainSpecialize(short, GetInt)
+BasicTypeLoad_PlainSpecialize(unsigned short, GetInt)
+BasicTypeLoad_PlainSpecialize(float, GetFloat)
+BasicTypeLoad_PlainSpecialize(double, GetDouble)
 BasicTypeLoad_Specialize(bool, GetBool)
 BasicTypeLoad_Specialize(std::string, GetString)
 BasicTypeLoad_Specialize(std::vector<int>, GetArrayInt)

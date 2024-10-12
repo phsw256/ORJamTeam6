@@ -23,6 +23,7 @@
 #include "Minimal.h"
 #include "ORTimer.h"
 #include "ORBackType.h"
+#include "ORAnimation.h"
 
  /***********************************************************************************************
   * WindowRelPos -- 从相对窗口的尺寸到一般尺寸                   
@@ -400,6 +401,7 @@ public:
     ORPopUpManager PopUpManager;
     ORUndoStack UndoStack;
     ORResourcePool<ORImage> ImagePool;
+    ORResourcePool<ORAnimType> AnimPool;
     ORResPtr<ORImage> MissingImage;
 
     ORWorkSpace() = default;

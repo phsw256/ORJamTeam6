@@ -22,12 +22,23 @@ namespace ImGui
 void ORImage::DrawChecked()
 {
     if (!Available())throw ORException(u8"ORImage::DrawChecked £∫ªÊ÷∆ ß∞‹");
-    ImGui::ImageEx(GetID(), DrawDelta, GetSize());
+    ImGui::ImageEx(GetID(), DrawDelta, GetSize(), ClipMin, ClipMax);
 }
 bool ORImage::Draw() noexcept
 {
     if (!Available())return false;
-    ImGui::ImageEx(GetID(), DrawDelta, GetSize());
+    ImGui::ImageEx(GetID(), DrawDelta, GetSize() , ClipMin, ClipMax);
+    return true;
+}
+void ORImage::DrawCheckedAt(ImDrawList& List, ImVec2 Pos)
+{
+    if (!Available())throw ORException(u8"ORImage::DrawCheckedAt £∫ªÊ÷∆ ß∞‹");
+    List.AddImage(GetID(), Pos + DrawDelta, Pos + DrawDelta + GetSize(), ClipMin, ClipMax);
+}
+bool ORImage::DrawAt(ImDrawList& List, ImVec2 Pos)
+{
+    if (!Available())return false;
+    List.AddImage(GetID(), Pos + DrawDelta, Pos + DrawDelta + GetSize(), ClipMin, ClipMax);
     return true;
 }
 bool ORImage::Load(const char* pFileName)
@@ -71,7 +82,8 @@ ORLoadable_DefineLoaderOuter(ORImage)
 {
     std::string Path;
     bool Relative, Center;
-    Obj("Path", Path)("Delta", DrawDelta, { 0.0F,0.0F })("DeltaRelative", Relative, false)("Centered", Center, false);
+    Obj("Path", Path)("Delta", DrawDelta, { 0.0F,0.0F })("ClipMin", ClipMin, { 0.0F,0.0F })
+        ("ClipMax", ClipMax, { 1.0F,1.0F })("DeltaRelative", Relative, false)("Centered", Center, false);
     Load(Path.c_str());
     /*
     sprintf_s(LogBuf, "Path=\"%s\"", Path.c_str());

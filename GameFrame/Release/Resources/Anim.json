@@ -1,0 +1,11 @@
+{
+    "ClipAnims": {
+        "Resources": {
+            "Blink1": {
+                "Image": "MISSING",
+                "Clip": [ 2, 2 ],
+                "Rate": 3
+            }
+        }
+    }
+}

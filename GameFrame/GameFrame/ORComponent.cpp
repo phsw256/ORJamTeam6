@@ -187,7 +187,7 @@ void ORHintManager::DrawUI()
         if (!CustomFn(CustomHint))Clear();
 
     DList->AddRectFilled(Position, Position + Size, ImColor(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg)));
-    DList->AddImage(BackGround->GetID(), Position, Position + Size);
+    BackGround->DrawAt(*DList, Position);
     if (FrameOnBottom)DList->AddLine(Position, Position + ImVec2{ Size.x, 0.0F }, ImColor(ImGui::GetStyleColorVec4(ImGuiCol_Border)), BorderThickness);
     else DList->AddRect(Position, Position + Size, ImColor(ImGui::GetStyleColorVec4(ImGuiCol_Border)), BorderRounding, ImDrawFlags_None, BorderThickness);
 

@@ -10,7 +10,7 @@ void ORDrawableTile::DrawAt(ImDrawList& List, ImVec2 ScreenPos, const ORDrawPosi
     if (Image)
     {
         ScreenPos.y += Pos.ZDrawOffset;
-        List.AddImage(Image->GetID(), ScreenPos + Image->GetDelta(), ScreenPos + Image->GetSize() + Image->GetDelta());
+        Image->DrawAt(List, ScreenPos);
     }
 }
 ImVec2 RotateToScreenPos(ImVec2 Pos)

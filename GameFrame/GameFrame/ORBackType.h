@@ -144,6 +144,16 @@ class ORResourcePool
 private:
     std::unordered_map<std::string, ORResPtr<T>> Pool;
 public:
+    inline std::unordered_map<std::string, ORResPtr<T>>& GetPool() { return Pool; }
+    inline const std::unordered_map<std::string, ORResPtr<T>>& GetPool()const { return Pool; }
+    template<typename U>
+    void Merge(const ORResourcePool<U>& p)
+    {
+        for (const auto& r : p.GetPool())
+        {
+            Pool.insert({ r.first, std::static_pointer_cast<T>(r.second) });
+        }
+    }
     bool Insert(const std::string_view Name, bool Replace, T* pResource)
     {
         auto it = Pool.find(std::string(Name));

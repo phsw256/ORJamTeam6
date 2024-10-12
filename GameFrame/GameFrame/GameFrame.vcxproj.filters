@@ -84,9 +84,6 @@
     <ClInclude Include="Global.h">
       <Filter>Util</Filter>
     </ClInclude>
-    <ClInclude Include="Stages.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="ORGameMap.h">
       <Filter>Util</Filter>
     </ClInclude>
@@ -97,6 +94,9 @@
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="ORLoadable.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="ORAnimation.h">
       <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
@@ -177,6 +177,9 @@
       <Filter>头文件</Filter>
     </ClCompile>
     <ClCompile Include="RoundData.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="ORAnimation.cpp">
       <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>

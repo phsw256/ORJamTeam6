@@ -92,6 +92,11 @@ void ORStage_MusicPlayer::DrawUI()
     {
         WorkSpace.TopBar.ForceChangeStage(u8"—°œÓ");
     }
+    if (Blink.Available())
+    {
+        if (!Blink.IsPlaying())Blink.Play();
+        Blink.Draw();
+    }
 }
 void ORStage_MusicPlayer::EventLoop()
 {
@@ -99,7 +104,10 @@ void ORStage_MusicPlayer::EventLoop()
 }
 void ORStage_MusicPlayer::OnSwitched()
 {
-
+    if (!Blink.Available())
+    {
+        Blink.Reset(WorkSpace.AnimPool.GetResource("Blink1"));
+    }
 }
 ORStage_MusicPlayer::ORStage_MusicPlayer(const _UTF8 std::string_view StageName) :
     ORStage(StageName), Menu(PlayList.GetSequence(),std::string(StageName), DrawMenuElem, (DWORD)&PlayList), RefreshRate(30)
@@ -464,6 +472,22 @@ namespace ORTest
             glfwSetWindowShouldClose(PreLink::window, 1);
         }
         WorkSpace.MissingImage = WorkSpace.ImagePool.GetResource("MISSING");
+        try {
+            ORJsonSource ImageSrc;
+            ImageSrc.ParseFromFile(".\\Resources\\Anim.json");
+            ORResourcePool<ORClipAnimType> ClipPool;
+            if (!ImageSrc.LoadObject("ClipAnims", ClipPool))throw ORException("«–∆¨∂Øª≠≥ÿ‘ÿ»Î ß∞‹£°");
+            WorkSpace.AnimPool.Merge(ClipPool);
+        }
+        catch (ORException& e)
+        {
+            MessageBoxW(MainWindowHandle, UTF8toUnicode(e.what()).c_str(), L"∂Øª≠≥ÿ‘ÿ»Î¥ÌŒÛ", MB_OK);
+            GlobalLog.AddLog_CurTime(false);
+            GlobalLog.AddLog(u8"∂Øª≠≥ÿ‘ÿ»Î¥ÌŒÛ");
+            GlobalLog.AddLog_CurTime(false);
+            GlobalLog.AddLog(e.what());
+            glfwSetWindowShouldClose(PreLink::window, 1);
+        }
     }
     void Loop()
     {

@@ -199,7 +199,8 @@ namespace ETimer
         inttime_t Count;
         timer_t Begin;
     public:
-        StrictRateClass(inttime_t Rate) :RateInt(Rate), Count(0), Begin(ClockNow()) {}
+        StrictRateClass(): RateInt(0), Count(1), Begin(ClockNow()) {}
+        StrictRateClass(inttime_t Rate) :RateInt(Rate), Count(1), Begin(ClockNow()) {}
         bool NextFrame()
         {
             if (Count * ClockTicksPerSec < (ClockNow() - Begin).count() * RateInt)
@@ -207,6 +208,12 @@ namespace ETimer
                 ++Count; return true;
             }
             else return false;
+        }
+        void Reset(inttime_t Rate = LLONG_MAX)
+        {
+            if (Rate != LLONG_MAX)RateInt = Rate;
+            Count = 1;
+            Begin = ClockNow();
         }
     };
 }
