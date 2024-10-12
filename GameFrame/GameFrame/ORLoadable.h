@@ -127,6 +127,22 @@ inline void BasicTypeLoad<ImColor>(ORJsonLoader& Obj, ImColor& Val)
         else Val = ImColor(V[0], V[0], V[0], V[1]);
         return;
     }
+    O = Obj.GetObjectItem("HSV");
+    if (O.Available())
+    {
+        auto V = O.GetArrayInt();
+        if (V.size() < 3)Obj.Success = false;
+        else Val.SetHSV(V[0] / 360.0F, V[1] / 100.0F, V[2] / 100.0F);
+        return;
+    }
+    O = Obj.GetObjectItem("HSVA");
+    if (O.Available())
+    {
+        auto V = O.GetArrayInt();
+        if (V.size() < 4)Obj.Success = false;
+        else Val.SetHSV(V[0] / 360.0F, V[1] / 100.0F, V[2] / 100.0F, V[3] / 255.0F);
+        return;
+    }
     Obj.Success = false;
 }
 
