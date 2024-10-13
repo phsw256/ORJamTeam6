@@ -25,7 +25,7 @@ private:
     int TimeSlider{ 0 };
     std::vector<DWORD>ResultBuffer;
     RateClass RefreshRate;
-    ORAnim Blink{ NoInit{} };
+    ORAnim Blink[4]{ NoInit{},NoInit{},NoInit{},NoInit{} };
 public:
     virtual ~ORStage_MusicPlayer() = default;
     virtual void DrawUI();

@@ -290,6 +290,7 @@ inline ORJsonLoader& ORJsonLoader::operator()(const std::string_view Item, T& Ob
         ORJsonLoader L(J);
         BasicTypeLoad<T>(L, Obj);
     }
+    else Success = true;
     return *this;
 }
 template<typename T>

@@ -92,11 +92,15 @@ void ORStage_MusicPlayer::DrawUI()
     {
         WorkSpace.TopBar.ForceChangeStage(u8"СЎПо");
     }
-    if (Blink.Available())
+    for (size_t i = 0; i < std::size(Blink); i++)
     {
-        if (!Blink.IsPlaying())Blink.Play();
-        Blink.Draw();
+        if (Blink[i].Available())
+        {
+            //if (!Blink[i].IsPlaying())Blink[i].Play();
+            Blink[i].Draw();
+        }
     }
+    WorkSpace.ImagePool.GetResource("MISSING")->Draw();
 }
 void ORStage_MusicPlayer::EventLoop()
 {
@@ -104,9 +108,14 @@ void ORStage_MusicPlayer::EventLoop()
 }
 void ORStage_MusicPlayer::OnSwitched()
 {
-    if (!Blink.Available())
+    if (!Blink[0].Available())
     {
-        Blink.Reset(WorkSpace.AnimPool.GetResource("Blink1"));
+        for (size_t i = 0; i < std::size(Blink); i++)
+        {
+            Blink[i].Reset(WorkSpace.AnimPool.GetResource("Blink1"));
+            Blink[i].SetFrame(i);
+            Blink[i].Play();
+        }
     }
 }
 ORStage_MusicPlayer::ORStage_MusicPlayer(const _UTF8 std::string_view StageName) :

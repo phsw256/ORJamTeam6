@@ -46,7 +46,9 @@ public:
     void DrawChecked();
     bool Draw() noexcept;
     void DrawCheckedAt(ImDrawList& List, ImVec2 Pos);
-    bool DrawAt(ImDrawList& List, ImVec2 Pos);
+    bool DrawAt(ImDrawList& List, ImVec2 Pos) noexcept;
+    bool Draw(ImVec2 Min, ImVec2 Max) noexcept;
+    bool DrawAt(ImDrawList& List, ImVec2 Pos, ImVec2 Min, ImVec2 Max) noexcept;
     inline bool Available() const { return OK; }
     bool Load(const char* pFileName);
     bool Load(ORReadStraw& Source);

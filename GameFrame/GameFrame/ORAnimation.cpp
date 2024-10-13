@@ -2,24 +2,27 @@
 #include "ORComponent.h"
 #include "Global.h"
 
-void ORClipAnimType::MoveClip(size_t Idx)
+void ORClipAnimType::MoveClip(size_t Idx, ImVec2& Min, ImVec2& Max)
 {
     auto s = size_t(ClipCount.x);
     auto y = float(Idx / s);
     auto x = float(Idx % s);
-    Image->ResetClip({ x / ClipCount.x , y / ClipCount.y }, { (x + 1) / ClipCount.x , (y + 1) / ClipCount.y });
+    Min = { x / ClipCount.x , y / ClipCount.y };
+    Max = { (x + 1) / ClipCount.x, (y + 1) / ClipCount.y };
 }
 bool ORClipAnimType::DrawFrameAt(size_t Idx, ImDrawList& List, ImVec2 Pos)
 {
     if (!Image || Idx >= GetFrameCount())return false;
-    MoveClip(Idx);
-    return Image->DrawAt(List, Pos);
+    ImVec2 mi, mx;
+    MoveClip(Idx, mi, mx);
+    return Image->DrawAt(List, Pos, mi, mx);
 }
 bool ORClipAnimType::DrawFrame(size_t Idx)
 {
     if (!Image || Idx >= GetFrameCount())return false;
-    MoveClip(Idx);
-    return Image->Draw();
+    ImVec2 mi, mx;
+    MoveClip(Idx, mi, mx);
+    return Image->Draw(mi, mx);
 }
 size_t ORClipAnimType::GetNextIdx(size_t Idx) const
 {
@@ -49,7 +52,7 @@ ORLoadable_DefineLoaderOuter(ORClipAnimType)
         if (!Seq.empty())
         {
             auto cnt = GetFrameCount();
-            Sequence.reserve(cnt);
+            Sequence.resize(cnt);
             for (size_t i = 0; i < cnt; i++)Sequence[i] = i + 1;
             for (auto& p : Seq)
                 if (size_t(p.x) < cnt)
@@ -90,17 +93,19 @@ void ORAnim::Play()
     {
         Playing = true;
         DrawRate.Reset(Type->Rate());
-        FrameIdx = Type->GetFirstFrame();
+        if (!FrameIdx)FrameIdx = Type->GetFirstFrame();
     }
 }
 void ORAnim::Reset(const ORResPtr<ORAnimType>& ptr)
 {
     Type = ptr;
     Playing = false;
+    FrameIdx = Type->GetFirstFrame();
 }
 void ORAnim::Stop()
 {
     Playing = false;
+    FrameIdx = 0;
 }
 ORAnim::ORAnim(ORAnim&& r)
 {

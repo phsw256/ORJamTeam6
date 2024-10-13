@@ -78,7 +78,7 @@ bool LogClass::AddLog_CurTime(bool ln)
 
 #include <ctime>
 const static char 星期[7][20] = 
-	{ "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" };
+	{ u8"星期日", u8"星期一", u8"星期二", u8"星期三", u8"星期四", u8"星期五", u8"星期六" };
 //const static char 月份[12][20] = 
 //{ "一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月", };
 //{ "1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月", };
@@ -88,7 +88,7 @@ std::string TimeNow()
 	std::tm stm;
 	std::time_t tt = std::time(0);
 	localtime_s(&stm, &tt);
-	sprintf(TBuf, "%04d年%02d月%02d日 %s %02d:%02d:%02d", stm.tm_year + 1900, stm.tm_mon + 1, stm.tm_mday, 星期[stm.tm_wday], stm.tm_hour, stm.tm_min, stm.tm_sec);
+	sprintf(TBuf, u8"%04d年%02d月%02d日 %s %02d:%02d:%02d", stm.tm_year + 1900, stm.tm_mon + 1, stm.tm_mday, 星期[stm.tm_wday], stm.tm_hour, stm.tm_min, stm.tm_sec);
 	std::string rt = TBuf;
 	delete[]TBuf;
 	return rt;

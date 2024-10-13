@@ -22,23 +22,35 @@ namespace ImGui
 void ORImage::DrawChecked()
 {
     if (!Available())throw ORException(u8"ORImage::DrawChecked £∫ªÊ÷∆ ß∞‹");
-    ImGui::ImageEx(GetID(), DrawDelta, GetSize(), ClipMin, ClipMax);
+    ImGui::ImageEx(GetID(), DrawDelta, GetSize() * (ClipMax - ClipMin), ClipMin, ClipMax);
 }
 bool ORImage::Draw() noexcept
 {
     if (!Available())return false;
-    ImGui::ImageEx(GetID(), DrawDelta, GetSize() , ClipMin, ClipMax);
+    ImGui::ImageEx(GetID(), DrawDelta, GetSize() * (ClipMax - ClipMin), ClipMin, ClipMax);
     return true;
 }
 void ORImage::DrawCheckedAt(ImDrawList& List, ImVec2 Pos)
 {
     if (!Available())throw ORException(u8"ORImage::DrawCheckedAt £∫ªÊ÷∆ ß∞‹");
-    List.AddImage(GetID(), Pos + DrawDelta, Pos + DrawDelta + GetSize(), ClipMin, ClipMax);
+    List.AddImage(GetID(), Pos + DrawDelta, Pos + DrawDelta + GetSize() * (ClipMax - ClipMin), ClipMin, ClipMax);
 }
-bool ORImage::DrawAt(ImDrawList& List, ImVec2 Pos)
+bool ORImage::DrawAt(ImDrawList& List, ImVec2 Pos) noexcept
 {
     if (!Available())return false;
-    List.AddImage(GetID(), Pos + DrawDelta, Pos + DrawDelta + GetSize(), ClipMin, ClipMax);
+    List.AddImage(GetID(), Pos + DrawDelta, Pos + DrawDelta + GetSize() * (ClipMax - ClipMin), ClipMin, ClipMax);
+    return true;
+}
+bool ORImage::Draw(ImVec2 Min, ImVec2 Max) noexcept
+{
+    if (!Available())return false;
+    ImGui::ImageEx(GetID(), DrawDelta, GetSize() * (Max - Min), Min, Max);
+    return true;
+}
+bool ORImage::DrawAt(ImDrawList& List, ImVec2 Pos, ImVec2 Min, ImVec2 Max) noexcept
+{
+    if (!Available())return false;
+    List.AddImage(GetID(), Pos + DrawDelta, Pos + DrawDelta + GetSize() * (Max - Min), Min, Max);
     return true;
 }
 bool ORImage::Load(const char* pFileName)

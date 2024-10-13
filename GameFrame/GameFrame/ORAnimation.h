@@ -24,7 +24,7 @@ private:
     std::vector<size_t> Sequence;
     int RateInt;
 
-    void MoveClip(size_t Idx);
+    void MoveClip(size_t Idx, ImVec2& Min, ImVec2& Max);
 public:
     virtual ~ORClipAnimType() {}
     virtual bool DrawFrameAt(size_t Idx, ImDrawList& List, ImVec2 Pos);
@@ -50,12 +50,13 @@ public:
     inline bool Available() const { return Type.get() != nullptr; }
     inline size_t CurrentFrame() const { return FrameIdx; }
     inline size_t TotalFrame() const { return Type ? Type->GetFrameCount() : 0u; }
+    inline void SetFrame(size_t Idx) { if (Idx < TotalFrame())FrameIdx = Idx; }
     bool Draw();
     bool DrawAt(ImDrawList& List, ImVec2 Pos);
     void Play();
     void Stop();
     void Reset(const ORResPtr<ORAnimType>&);
-    inline bool IsPlaying() { return Playing; }
+    inline bool IsPlaying() { return Update(); }
     ORAnim() = delete;
     ORAnim(NoInit) {}
     ORAnim(const ORAnim&) = delete;

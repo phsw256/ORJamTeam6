@@ -4,6 +4,15 @@
             "Blink1": {
                 "Image": "MISSING",
                 "Clip": [ 2, 2 ],
+                "Rate": 3,
+                "SequenceShort": [
+                    [ 3, 0 ],
+                    [ 0, 1 ]
+                ]
+            },
+            "Blink2": {
+                "Image": "MISSING",
+                "Clip": [ 2, 2 ],
                 "Rate": 3
             }
         }
