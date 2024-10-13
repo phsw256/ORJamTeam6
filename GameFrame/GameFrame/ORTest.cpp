@@ -15,6 +15,13 @@ void ORStage_MusicPlayer::DrawMenuElem(std::string& Str, int RelIdx, int AbsIdx,
     if (ImGui::ArrowButton(Str.c_str(), ImGuiDir_Right))
         ((ORAsyncPlayList*)pList)->SwitchTo(AbsIdx);
 }
+void ORStage_MusicPlayer::StartPlay()
+{
+    PlayList.StartPlay();
+    PlayList.AsyncCurrentMusicIdx();
+    PlayList.AsyncCurrentTime();
+    PlayList.AsyncTotalTime();
+}
 void ORStage_MusicPlayer::DrawUI()
 {
     if (PlayList.IsPlaying())
@@ -82,10 +89,7 @@ void ORStage_MusicPlayer::DrawUI()
     {
         if (ImGui::Button(u8"开始播放"))
         {
-            PlayList.StartPlay();
-            PlayList.AsyncCurrentMusicIdx();
-            PlayList.AsyncCurrentTime();
-            PlayList.AsyncTotalTime();
+            StartPlay();
         }
     }
     if (ImGui::Button(u8"返回"))
@@ -147,7 +151,7 @@ void Stage_MainMenu::DrawUI()
     }helper.SetX();
     if (ImGui::Button(u8"制作团队"))
     {
-
+        WorkSpace.TopBar.ForceChangeStage(u8"制作");
     }helper.SetX();
     if (ImGui::Button(u8"退出游戏"))
     {
@@ -166,7 +170,7 @@ void Stage_MainMenu::OnSwitched()
         auto& List = pPlayer->GetList();
         if (!List.IsPlaying())
         {
-            List.StartPlay();
+            pPlayer->StartPlay();
             List.SetPlayFromFirst();
             List.SetVolume(InitialVolume);
         }
@@ -243,8 +247,24 @@ void Stage_Setting::SwitchInMenu()
     ToMainMenu = true;
 }
 
+void Stage_MainGame::DrawUI_IsoMap()
+{
+    auto& Set = TileMap.GetDrawSetting();
+    Set.DrawBorder = ImRect(ImVec2{ 50.0F,150.0F }, ImGui::GetWindowSize() - ImVec2{ 50.0F, 80.0F });
+    Set.ProcessBorder = ImRect({ 0.0F,0.0F }, ImGui::GetWindowSize());
+    Set.DrawTarget = ImGui::GetBackgroundDrawList();
+    Set.CenterDrawPos = WindowRelPos({ 0.5F,0.5F });
+    InvisibleArrow("1"); ImGui::SameLine();
+    if (ImGui::ArrowButton("UP", ImGuiDir_Up))TileMap.MoveView({ -0.2F,-0.2F });
+    if (ImGui::ArrowButton("LEFT", ImGuiDir_Left))TileMap.MoveView({ -0.2F,0.2F });
+    ImGui::SameLine(); InvisibleArrow("2"); ImGui::SameLine();
+    if (ImGui::ArrowButton("RIGHT", ImGuiDir_Right))TileMap.MoveView({ 0.2F,-0.2F });
+    InvisibleArrow("3"); ImGui::SameLine();
+    if (ImGui::ArrowButton("DOWN", ImGuiDir_Down))TileMap.MoveView({ 0.2F,0.2F });
+    TileMap.DrawUI();
+}
 
-void Stage_MainGame::DrawUI()
+void Stage_MainGame::DrawUI_RoundAction()
 {
     if (Rules->Setting.MMPMode)
     {
@@ -272,19 +292,67 @@ void Stage_MainGame::DrawUI()
         Pause();
         WorkSpace.TopBar.ForceChangeStage(u8"游戏选项");
     }
-    auto& Set = TileMap.GetDrawSetting();
-    Set.DrawBorder = ImRect(ImVec2{ 50.0F,150.0F }, ImGui::GetWindowSize() - ImVec2{ 50.0F, 80.0F });
-    Set.ProcessBorder = ImRect({ 0.0F,0.0F }, ImGui::GetWindowSize());
-    Set.DrawTarget = ImGui::GetBackgroundDrawList();
-    Set.CenterDrawPos = WindowRelPos({ 0.5F,0.5F });
-    InvisibleArrow("1"); ImGui::SameLine();
-    if (ImGui::ArrowButton("UP", ImGuiDir_Up))TileMap.MoveView({ -0.2F,-0.2F });
-    if (ImGui::ArrowButton("LEFT", ImGuiDir_Left))TileMap.MoveView({ -0.2F,0.2F });
-    ImGui::SameLine(); InvisibleArrow("2"); ImGui::SameLine();
-    if (ImGui::ArrowButton("RIGHT", ImGuiDir_Right))TileMap.MoveView({ 0.2F,-0.2F });
-    InvisibleArrow("3"); ImGui::SameLine();
-    if (ImGui::ArrowButton("DOWN", ImGuiDir_Down))TileMap.MoveView({ 0.2F,0.2F });
-    TileMap.DrawUI();
+    if (ImGui::Button(u8"下一回合"))
+    {
+        Cache.CalcResult(*Tree);
+    }
+    DrawUI_IsoMap();
+}
+
+void Stage_MainGame::DrawUI_RoundBegin()
+{
+    if (Cache.BeginAnim.IsPlaying())
+    {
+        auto helper = PosSetHelper(WindowRelPos({ 0.3F,0.3F }));
+        Cache.BeginAnim.Draw();
+        helper.SetX();
+        auto pEra = Tree->AtEra(Cache.RoundCount);
+        ImGui::TextWrapped(u8"回合 : %d", Cache.RoundCount);
+        helper.SetX();
+        ImGui::TextWrapped(u8"时代 : %s", pEra->Name.Name.c_str());
+    }
+    else
+    {
+        Cache.EnterEventStage(*Tree);
+    }
+}
+
+void Stage_MainGame::DrawUI_RoundEvent()
+{
+    Cache.CurrentStage = RoundCache::Stage::Action;
+}
+void Stage_MainGame::DrawUI_RoundResult()
+{
+    Cache.CurrentStage = RoundCache::Stage::End;
+}
+void Stage_MainGame::DrawUI_RoundEnd()
+{
+    Cache.NextRound(*Tree);
+}
+void Stage_MainGame::DrawUI_RoundLast()
+{
+    Uninit();
+    WorkSpace.TopBar.ForceChangeStage(u8"主菜单");
+}
+
+
+void Stage_MainGame::Uninit()
+{
+
+}
+
+void Stage_MainGame::DrawUI()
+{
+    switch (Cache.CurrentStage)
+    {
+    case RoundCache::Stage::Begin:DrawUI_RoundBegin(); break;
+    case RoundCache::Stage::Event:DrawUI_RoundEvent(); break;
+    case RoundCache::Stage::Action:DrawUI_RoundAction(); break;
+    case RoundCache::Stage::Result:DrawUI_RoundResult(); break;
+    case RoundCache::Stage::End:DrawUI_RoundEnd(); break;
+    case RoundCache::Stage::Last:DrawUI_RoundLast(); break;
+    default:throw ORException(u8"Stage_MainGame::DrawUI : 阿弥诺斯！这给我干哪来辣！");
+    }
 }
 void Stage_MainGame::InitTileMap()
 {
@@ -337,7 +405,7 @@ void Stage_InGameOptions::DrawUI()
         if (pSet)pSet->SwitchInGame();
         WorkSpace.TopBar.ForceChangeStage(u8"选项");
     }
-    if (ImGui::Button(u8"接着玩！"))
+    if (ImGui::Button(u8"继续"))
     {
         Main->Resume();
         WorkSpace.TopBar.ForceChangeStage(u8"游戏");
@@ -355,6 +423,49 @@ void Stage_InGameOptions::OnSwitched()
 
 }
 Stage_InGameOptions::Stage_InGameOptions(const _UTF8 std::string_view StageName) : ORStage(StageName)
+{
+
+}
+
+const char* CreditLink = "https://github.com/phsw256/ORJamTeam6";
+
+void Stage_Credits::DrawUI()
+{
+    auto helper = PosSetHelper(WindowRelPos({ 0.3F,0.3F }));
+    ImGui::TextWrapped(
+u8R"(制作团队：
+主策：吴柯靓
+主程：何广一
+主美：杨清心
+程序：吴柯靓，裴咨亦，戴瑞灏，（段淳朴）
+美术：路巨聪
+策划：其实所有人都是策划
+关注我们：%s
+)", CreditLink);
+    helper.SetX();
+    if (ImGui::SmallButton(u8"复制"))
+    {
+        ImGui::SetClipboardText(CreditLink);
+    }ImGui::SameLine();
+    if (ImGui::SmallButton(u8"打开"))
+    {
+        ShellExecuteA(NULL, "open", CreditLink, NULL,NULL,SW_SHOWMAXIMIZED);
+    }
+    helper.SetX();
+    if (ImGui::Button(u8"返回"))
+    {
+        WorkSpace.TopBar.ForceChangeStage(u8"主菜单");
+    }
+}
+void Stage_Credits::EventLoop()
+{
+
+}
+void Stage_Credits::OnSwitched()
+{
+
+}
+Stage_Credits::Stage_Credits(const _UTF8 std::string_view StageName) : ORStage(StageName)
 {
 
 }
@@ -390,7 +501,6 @@ void Stage_TechTree::DrawUI()
     if (ImGui::ArrowButton("RIGHT", ImGuiDir_Right))pt->GetMap().MoveView({ 0.4F,0.0F });
     //InvisibleArrow("3"); ImGui::SameLine();
     //if (ImGui::ArrowButton("DOWN", ImGuiDir_Down))pt->GetMap().MoveView({ 0.2F,0.2F });
-    if (Opts[CurOpt].BgCol.Value.w > 0.001)pt->GetMap().FillDrawArea(Opts[CurOpt].BgCol);
     pt->DrawUI();
 }
 void Stage_TechTree::Init()
@@ -401,11 +511,6 @@ void Stage_TechTree::Init()
         if (!ImageSrc.LoadObject(u8"Body_TechTree", BodyTechTree))throw ORException("体质树载入失败！");
         if (!ImageSrc.LoadObject(u8"Culture_TechTree", CulTechTree))throw ORException("文化树载入失败！");
         if (!ImageSrc.LoadObject(u8"Science_TechTree", SciTechTree))throw ORException("科技树载入失败！");
-        std::vector<ImColor> Colors;
-        if (ImageSrc.LoadObject(u8"Colors", Colors))
-            for (size_t i = 0; i < std::min(Colors.size(),std::size(Opts)); i++)
-                Opts[i].BgCol = Colors[i];
-        else throw ORException("背景色载入失败！");
     }
     catch (ORException& e)
     {
@@ -460,6 +565,7 @@ namespace ORTest
 
         AddEnabledStage<Stage_MainMenu>(u8"主菜单");
         AddEnabledStage<Stage_Setting>(u8"选项");
+        AddEnabledStage<Stage_Credits>(u8"制作");
         AddEnabledStage<Stage_ShellSelect>(u8"开始");
         AddEnabledStage<Stage_MainGame>(u8"游戏");
         AddEnabledStage<Stage_InGameOptions>(u8"游戏选项");

@@ -66,11 +66,14 @@ bool ORAnim::Update()
 {
     if (Playing)
     {
-        if (DrawRate.NextFrame())
+        while (DrawRate.NextFrame())
         {
             FrameIdx = Type->GetNextIdx(FrameIdx);
-            if (FrameIdx >= Type->GetFrameCount())Stop();
-            return Playing;
+            if (FrameIdx >= Type->GetFrameCount())
+            {
+                Stop();
+                return false;
+            }
         }
         return true;
     }

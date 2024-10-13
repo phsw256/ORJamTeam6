@@ -27,6 +27,7 @@ extern Ini::IniFile Config;
 extern int FontHeight;
 extern int FPSLimit;
 extern int ScrX, ScrY;
+extern bool FullScreen;
 extern int FnInfoDelay;
 extern int FnInfoEndDelay;
 

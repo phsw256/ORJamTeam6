@@ -5,10 +5,7 @@
                 "Image": "MISSING",
                 "Clip": [ 2, 2 ],
                 "Rate": 3,
-                "SequenceShort": [
-                    [ 3, 0 ],
-                    [ 0, 1 ]
-                ]
+                "SequenceShort": [ [ 3, 0 ] ]
             },
             "Blink2": {
                 "Image": "MISSING",

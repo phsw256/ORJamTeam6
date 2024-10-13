@@ -2,70 +2,142 @@
     "Body_TechTree": {
         "InitialPos": [ 0, 0 ],
         "SizeRatio": [ 300, 300 ],
+        "BgColor": { "RGBA": [ 255, 255, 255, 200 ] },
+        "TextColor": { "KA": [ 0, 255 ] },
+        "HintBgColor": { "KA": [ 255, 255 ] },
+        "HintTextColor": { "KA": [ 0, 255 ] },
         "Eras": {
             "E1": {
                 "NameGroup": {
-                    "Name": "1",
-                    "Description": "2",
-                    "Hint": "3"
+                    "Name": "婴幼儿",
+                    "Description": "第一时代",
+                    "Hint": " "
                 },
-                "Position": [ 0, 0 ]
+                "Position": [ 0, 0 ],
+                "RoundRange": [ 1, 7 ]
+            },
+            "E2": {
+                "NameGroup": {
+                    "Name": "小学",
+                    "Description": "第二时代",
+                    "Hint": " "
+                },
+                "Position": [ 0, 0 ],
+                "RoundRange": [ 7, 13 ]
+            },
+            "E3": {
+                "NameGroup": {
+                    "Name": "初中",
+                    "Description": "第三时代",
+                    "Hint": " "
+                },
+                "Position": [ 0, 0 ],
+                "RoundRange": [ 13, 19 ]
+            },
+            "E4": {
+                "NameGroup": {
+                    "Name": "高中",
+                    "Description": "第四时代",
+                    "Hint": " "
+                },
+                "Position": [ 0, 0 ],
+                "RoundRange": [ 19, 25 ]
             }
         },
         "Nodes": {
             "A": {
                 "NameGroup": {
-                    "Name": "A1",
-                    "Description": "A2",
-                    "Hint": "A3"
+                    "Name": "爬行",
+                    "Description": "从水下的第一个生命的萌芽开始……我们必须相信单细胞生物一开始是爬着走的。",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:无;\n尤里卡2:无;\n尤里卡3:无;"
                 },
-                "Image": "1", //�����Ч�Զ�����MISSING
+                "Image": "1", //如果无效自动调用MISSING
                 "Era": "E1",
                 "EffectValue": {
-                    "Tech": -1.0,
-                    "Body": -1.0,
-                    "Culture": -2
+                    "Need": 0,
+                    "Input": 100,
+                    "reward": {
+                        "BasQua": 5
+                    }
                 },
                 "RelativePos": {
                     "X": 0,
                     "Y": 0,
                     "ZOrder": 0,
-                    "ZOffset": 0 //ֻ��ZOffset�ĵ�λ����Ļ����
-                }
+                    "ZOffset": 0 //只有ZOffset的单位是屏幕像素
+                },
+                "Unlock": [ "PaXin" ],
+                "Prereq": []
             },
             "B": {
                 "NameGroup": {
-                    "Name": "A1",
-                    "Description": "A2",
-                    "Hint": "A3"
+                    "Name": "走路",
+                    "Description": "……到人类第一次直立行走。至少对你来说是第一次。",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:学会爬行;\n尤里卡2:完成2次“爬行练习”;\n尤里卡3:无;"
                 },
-                "Image": "Tile1", //�����Ч�Զ�����MISSING
+                "Image": "Tile1",
                 "Era": "E1",
                 "EffectValue": {
-                    "Tech": -1.0,
-                    "Body": -1.0,
-                    "Culture": -2
+                    "Need": 10,
+                    "Input": 100,
+                    "reward": {
+                        "BasQua": 5
+                    }
                 },
                 "RelativePos": {
                     "X": 1,
                     "Y": 1,
                     "ZOrder": 0,
-                    "ZOffset": 0 //ֻ��ZOffset�ĵ�λ����Ļ����
-                }
+                    "ZOffset": 0
+                },
+                "Unlock": [ "ZouLu" ],
+                "Prereq": [ "A" ]
             }
         }
     },
     "Culture_TechTree": {
         "InitialPos": [ 0, 0 ],
         "SizeRatio": [ 300, 300 ],
+        "BgColor": { "RGB": [ 252, 135, 154 ] },
+        "TextColor": { "KA": [ 0, 255 ] },
+        "HintBgColor": { "KA": [ 255, 255 ] },
+        "HintTextColor": { "KA": [ 0, 255 ] },
         "Eras": {
             "E1": {
                 "NameGroup": {
-                    "Name": "1",
-                    "Description": "2",
-                    "Hint": "3"
+                    "Name": "婴幼儿",
+                    "Description": "第一时代",
+                    "Hint": " "
                 },
-                "Position": [ 0, 0 ]
+                "Position": [ 0, 0 ],
+                "RoundRange": [ 1, 7 ]
+            },
+            "E2": {
+                "NameGroup": {
+                    "Name": "小学",
+                    "Description": "第二时代",
+                    "Hint": " "
+                },
+                "Position": [ 0, 0 ],
+                "RoundRange": [ 7, 13 ]
+            },
+            "E3": {
+                "NameGroup": {
+                    "Name": "初中",
+                    "Description": "第三时代",
+                    "Hint": " "
+                },
+                "Position": [ 0, 0 ],
+                "RoundRange": [ 13, 19 ]
+            },
+            "E4": {
+                "NameGroup": {
+                    "Name": "高中",
+                    "Description": "第四时代",
+                    "Hint": " "
+                },
+                "Position": [ 0, 0 ],
+                "RoundRange": [ 19, 25 ]
             }
         },
         "Nodes": {
@@ -75,7 +147,7 @@
                     "Description": "A2",
                     "Hint": "A3"
                 },
-                "Image": "1", //�����Ч�Զ�����MISSING
+                "Image": "1", //如果无效自动调用MISSING
                 "Era": "E1",
                 "EffectValue": {
                     "Tech": -1.0,
@@ -86,7 +158,7 @@
                     "X": 0,
                     "Y": 0,
                     "ZOrder": 0,
-                    "ZOffset": 0 //ֻ��ZOffset�ĵ�λ����Ļ����
+                    "ZOffset": 0 //只有ZOffset的单位是屏幕像素
                 }
             }
         }
@@ -94,14 +166,46 @@
     "Science_TechTree": {
         "InitialPos": [ 0, 0 ],
         "SizeRatio": [ 200, 200 ],
+        "BgColor": { "KA": [ 25, 60 ] },
+        "TextColor": { "KA": [ 0, 255 ] },
+        "HintBgColor": { "KA": [ 255, 255 ] },
+        "HintTextColor": { "KA": [ 0, 255 ] },
         "Eras": {
             "E1": {
                 "NameGroup": {
-                    "Name": "1",
-                    "Description": "2",
-                    "Hint": "3"
+                    "Name": "婴幼儿",
+                    "Description": "第一时代",
+                    "Hint": " "
                 },
-                "Position": [ 0, 0 ]
+                "Position": [ 0, 0 ],
+                "RoundRange": [ 1, 7 ]
+            },
+            "E2": {
+                "NameGroup": {
+                    "Name": "小学",
+                    "Description": "第二时代",
+                    "Hint": " "
+                },
+                "Position": [ 0, 0 ],
+                "RoundRange": [ 7, 13 ]
+            },
+            "E3": {
+                "NameGroup": {
+                    "Name": "初中",
+                    "Description": "第三时代",
+                    "Hint": " "
+                },
+                "Position": [ 0, 0 ],
+                "RoundRange": [ 13, 19 ]
+            },
+            "E4": {
+                "NameGroup": {
+                    "Name": "高中",
+                    "Description": "第四时代",
+                    "Hint": " "
+                },
+                "Position": [ 0, 0 ],
+                "RoundRange": [ 19, 25 ]
             }
         },
         "Nodes": {
@@ -111,7 +215,7 @@
                     "Description": "A2",
                     "Hint": "A3"
                 },
-                "Image": "1", //�����Ч�Զ�����MISSING
+                "Image": "1", //如果无效自动调用MISSING
                 "Era": "E1",
                 "EffectValue": {
                     "Tech": -1.0,
@@ -122,16 +226,11 @@
                     "X": 0,
                     "Y": 0,
                     "ZOrder": 0,
-                    "ZOffset": 0 //ֻ��ZOffset�ĵ�λ����Ļ����
+                    "ZOffset": 0 //只有ZOffset的单位是屏幕像素
                 }
             }
         }
-    },
-    "Colors": [
-        { "RGBA": [ 255, 255, 255, 200 ] },
-        { "RGB": [ 252, 135, 154 ] },
-        { "KA": [ 25, 60 ] }
-    ]
+    }
 }
 /*
 R:Red G:Green B:Blue A:Alpha K:Black H:Hue S:Saturation V:Value

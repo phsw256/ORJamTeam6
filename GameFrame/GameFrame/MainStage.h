@@ -10,7 +10,6 @@
 #include "ORBackType.h"
 #include "MusicMCI.h"
 
-ORResourcePool<ORImage> Pool1;
 ORDescManager Mg1;
 MusicMCI Ms1;
 
@@ -33,8 +32,8 @@ void ControlPanel()
     ImGui::SetWindowSize({ (float)(wp.right - wp.left - WindowSizeAdjustX),(float)(wp.bottom - wp.top) });
 
     Mg1.Resize(WindowRelPos({ 0.2F,0.65F }), WindowRelPos({ 0.6F,0.3F }));
-    ImGui::Text(u8"等待填入内容");
-    if (ImGui::IsItemHovered())Mg1.SetDesc(u8"等待填入内容");
+    //ImGui::Text(u8"等待填入内容");
+    //if (ImGui::IsItemHovered())Mg1.SetDesc(u8"等待填入内容");
     ImGui::Text(u8"平均FPS %.1f", ImGui::GetIO().Framerate);
     if (ImGui::IsItemHovered())Mg1.SetDesc(u8"FUCK");
 
@@ -72,7 +71,7 @@ int ExitUninit()
 	if (EnableLog)
 	{
 		GlobalLog.AddLog_CurTime(false);
-		GlobalLog.AddLog("程序正在结束运行。");
+		GlobalLog.AddLog(u8"程序正在结束运行。");
 	}
 
     ORTest::CleanUp();
@@ -81,7 +80,7 @@ int ExitUninit()
 	if (EnableLog)
 	{
 		GlobalLog.AddLog_CurTime(false);
-		GlobalLog.AddLog("程序已经结束运行。");
+		GlobalLog.AddLog(u8"程序已经结束运行。");
 	}
 
 	return 0;

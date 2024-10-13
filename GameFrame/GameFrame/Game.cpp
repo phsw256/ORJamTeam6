@@ -69,8 +69,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     FontLoaded.store(false);
 
     hInst = hInstance;
-    //auto _lpwCmdLine = L"/800*0<FFFFFF>";a
-    auto _lpwCmdLine = lpCmdLine;
+    auto _lpwCmdLine = L"1/1280*720";
+    //auto _lpwCmdLine = lpCmdLine;
 
     RScrX = GetSystemMetrics(SM_CXSCREEN);
     RScrY = GetSystemMetrics(SM_CYSCREEN);

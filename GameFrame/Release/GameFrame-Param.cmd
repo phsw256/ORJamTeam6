@@ -1,2 +1,2 @@
-start  .\GameFrame 1/450*750
+start  .\GameFrame 1/1450*750
 exit

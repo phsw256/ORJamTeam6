@@ -34,9 +34,10 @@ public:
     virtual void DrawAt(ImDrawList& List, ImVec2 ScreenPos, const ORDrawPosition& Pos);
     virtual void UpdateTile() {}
     virtual void OnClick() {}
-    inline ImRect DeltaRect() { return ImRect{ Image->GetDelta(), Image->GetSize() + Image->GetDelta() }; }
-    inline ImVec2 DeltaRectMin() { return Image->GetDelta(); }
-    inline ImVec2 DeltaRectMax() { return Image->GetSize() + Image->GetDelta(); }
+    virtual void OnHover() {}
+    inline ImRect DeltaRect() { return Image->GetDeltaRect(); }
+    inline ImVec2 DeltaRectMin() { return Image->GetDeltaMin(); }
+    inline ImVec2 DeltaRectMax() { return Image->GetDeltaMax(); }
 };
 
 class ORMapObject :public ORDrawableTile
@@ -129,7 +130,7 @@ void ORTileMap<TileTrait>::DrawUI()//With Update Tiles
         auto ScrPos = TileTrait::DrawPosToScreen(Setting, p.first);
         auto pImg = p.second->GetImage().get();
         if (!pImg)continue;
-        auto Rect = ImRect(ScrPos + pImg->GetDelta(), ScrPos + pImg->GetSize() + pImg->GetDelta());
+        auto Rect = ImRect(ScrPos + pImg->GetDeltaMin(), ScrPos + pImg->GetDeltaMax());
         if (ContainPart(Setting.ProcessBorder, Rect))
             p.second->UpdateTile();
         if (ContainPart(Setting.DrawBorder, Rect))
@@ -140,9 +141,9 @@ void ORTileMap<TileTrait>::DrawUI()//With Update Tiles
                 ImGui::SetCursorPos(Rect.Min);
                 ImGui::Dummy(pImg->GetSize());
                 if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
-                {
                     p.second->OnClick();
-                }
+                if (ImGui::IsItemHovered())
+                    p.second->OnHover();
             }
         }
             

@@ -38,6 +38,7 @@ public:
         return PlayList.AddToList(ID, music, Replace);
     }
     inline ORAsyncPlayList& GetList() { return PlayList; }
+    void StartPlay();
 };
 
 class Stage_MainMenu : public ORStage
@@ -108,19 +109,34 @@ public:
     Stage_InGameOptions(const _UTF8 std::string_view StageName);
 };
 
+class Stage_Credits : public ORStage
+{
+public:
+    virtual ~Stage_Credits() = default;
+    virtual void DrawUI();
+    virtual void EventLoop();
+    virtual void OnSwitched();
+    Stage_Credits(const _UTF8 std::string_view StageName);
+};
+
+
 class Stage_TechTree : public ORStage
 {
     struct Opt
     {
         TechTree* pTree;
         std::string Name;
-        ImColor BgCol;
     };
     Stage_MainGame* Main{ nullptr };
     TechTree BodyTechTree, CulTechTree, SciTechTree;
     Opt Opts[3] = { {&BodyTechTree, u8"体质"}, {&CulTechTree, u8"文化"}, {&SciTechTree, u8"科技"} };
     int CurOpt{ 0 };
 public:
+    TechTree& GetBodyTree() { return BodyTechTree; }
+    TechTree& GetCulTree() { return CulTechTree; }
+    TechTree& GetSciTree() { return SciTechTree; }
+    EraData* AtEra(int Round) { return BodyTechTree.AtEra(Round); }
+
     void Init();
 
     virtual ~Stage_TechTree() = default;
@@ -135,9 +151,19 @@ class Stage_MainGame : public ORStage
     std::unique_ptr<RulesClass> Rules;
     ORIsoTileMap TileMap;
     Stage_TechTree* Tree{ nullptr };
+    RoundCache Cache;
 
+    void Uninit();
     void InitTileMap();
     void InitTechTree();
+
+    void DrawUI_IsoMap();
+    void DrawUI_RoundBegin();
+    void DrawUI_RoundEvent();
+    void DrawUI_RoundAction();
+    void DrawUI_RoundResult();
+    void DrawUI_RoundEnd();
+    void DrawUI_RoundLast();
 public:
     virtual ~Stage_MainGame() = default;
     virtual void DrawUI();
@@ -146,12 +172,12 @@ public:
     inline void InitRules(const ShellSetting& Setting)
     {
         Rules.reset(new RulesClass(Setting));
-        InitTileMap(); InitTechTree();
+        InitTileMap(); InitTechTree(); Cache.Init(*Rules);
     }
     inline void InitRules(教程关Rules _)
     {
         Rules.reset(new RulesClass(_));
-        InitTileMap(); InitTechTree();
+        InitTileMap(); InitTechTree(); Cache.Init(*Rules);
     }
     Stage_MainGame(const _UTF8 std::string_view StageName);
     void Pause();

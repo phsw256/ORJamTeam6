@@ -13,6 +13,7 @@ std::wstring CurrentPathW, MusicPathW;
 Ini::IniFile Config;
 int FontHeight = 16;
 int FPSLimit = -1;
+bool FullScreen;
 int ScrX, ScrY;
 int FnInfoDelay = 1000, FnInfoEndDelay = 5000;
 

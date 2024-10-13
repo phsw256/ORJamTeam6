@@ -15,34 +15,20 @@ namespace PreLink
         if (EnableLog)
         {
             GlobalLog.AddLog_CurTime(false);
-            sprintf(gle, "GLFW错误：错误码：%d 错误信息：%s", error, description);
+            sprintf(gle, u8"GLFW错误：错误码：%d 错误信息：%s", error, description);
             GlobalLog.AddLog(gle);
         }
     }
     
     int PreLoop1()
     {
-        glfwSetErrorCallback(glfw_error_callback);
-        if (!glfwInit())
-            return 1;
-        glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-        window = glfwCreateWindow(ScrX, ScrY, u8"INI浏览器", NULL, NULL);
-        MainWindowHandle = glfwGetWin32Window(window);
-        //glfwHideWindow(window);
-        SetClassLong(MainWindowHandle, GCL_HICON, (LONG)LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICON1)));
-        //ShowWindow(MainWindowHandle, SW_HIDE);
-        
-        if (window == NULL)
-            return 1;
-        glfwMakeContextCurrent(window);
-        glfwSwapInterval(1); // Enable vsync
-
         if (EnableLog)
         {
             GlobalLog.AddLog_CurTime(false);
-            GlobalLog.AddLog("成功打开窗口。");
+            GlobalLog.AddLog(u8"成功打开窗口。");
         }
 
+        FullScreen = false;
         if (Config.Load(".\\Resources\\config.ini"))
         {
             auto Sec = Config.GetSection("Setting");
@@ -55,7 +41,7 @@ namespace PreLink
                     try { Tsz = std::stoi(Lin->second.Value.str); }
                     catch (std::exception& e) { (void)e; }
                     FontHeight = std::max(Tsz, 12);
-                    FontHeight = std::min(Tsz, 28);
+                    FontHeight = std::min(Tsz, 32);
                 }
                 Lin = Sec->second.GetLine("Font.Name");
                 if (Lin != Sec->second.NotFound())
@@ -84,12 +70,18 @@ namespace PreLink
                     try { FPSLimit = std::stoi(Lin->second.Value.str); }
                     catch (std::exception& e) { (void)e; }
                 }
+                Lin = Sec->second.GetLine("Render.FullScreen");
+                if (Lin != Sec->second.NotFound())
+                {
+                    try { FullScreen = GlobalAnalyze::IsTrueString(Lin->second.Value.str); }
+                    catch (std::exception& e) { (void)e; }
+                }
                
             }
             if (EnableLog)
             {
                 GlobalLog.AddLog_CurTime(false);
-                GlobalLog.AddLog("成功载入.\\Resources\\config.ini");
+                GlobalLog.AddLog(u8"成功载入.\\Resources\\config.ini");
             }
         }
         else
@@ -99,9 +91,22 @@ namespace PreLink
             if (EnableLog)
             {
                 GlobalLog.AddLog_CurTime(false);
-                GlobalLog.AddLog("未能载入.\\Resources\\config.ini");
+                GlobalLog.AddLog(u8"未能载入.\\Resources\\config.ini");
             }
         }
+
+        glfwSetErrorCallback(glfw_error_callback);
+        if (!glfwInit())
+            return 1;
+        glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+        window = glfwCreateWindow(ScrX, ScrY, u8"INI浏览器", FullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+        MainWindowHandle = glfwGetWin32Window(window);
+        SetClassLong(MainWindowHandle, GCL_HICON, (LONG)LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICON1)));
+
+        if (window == NULL)
+            return 1;
+        glfwMakeContextCurrent(window);
+        glfwSwapInterval(1); // Enable vsync
 
         onexit(ExitUninit);
         return 0;
@@ -154,7 +159,7 @@ namespace PreLink
             if (EnableLog)
             {
                 GlobalLog.AddLog_CurTime(false);
-                GlobalLog.AddLog("成功载入.\\Resources\\load.txt");
+                GlobalLog.AddLog(u8"成功载入.\\Resources\\load.txt");
             }
 
             //0x4e00, 0x9FAF, // CJK Ideograms
@@ -186,12 +191,10 @@ namespace PreLink
         if (EnableLog)
         {
             GlobalLog.AddLog_CurTime(false);
-            GlobalLog.AddLog(("成功载入字体：" + FontPath).c_str());
+            GlobalLog.AddLog((u8"成功载入字体：" + FontPath).c_str());
         }
         FontLoaded.store(true);
 
-        Pool1.Emplace("001", true, ".\\Resources\\Image\\001.png");
-        Mg1.BackGround = Pool1.GetResource("001");
         ORTest::Init();
     }
     
@@ -216,7 +219,7 @@ namespace PreLink
             if (EnableLog)
             {
                 GlobalLog.AddLog_CurTime(false);
-                GlobalLog.AddLog("主循环开始工作。");
+                GlobalLog.AddLog(u8"主循环开始工作。");
             }
             uint64_t TimeWait = GetSysTimeMicros();
             while (!glfwWindowShouldClose(window))
@@ -242,13 +245,13 @@ namespace PreLink
                     if (EnableLog)
                     {
                         GlobalLog.AddLog_CurTime(false);
-                        GlobalLog.AddLog("font->ContainerAtlas == NULL");
+                        GlobalLog.AddLog(u8"font->ContainerAtlas == NULL");
                         GlobalLog.AddLog_CurTime(false);
-                        GlobalLog.AddLog("字体载入失败，异常退出。");
+                        GlobalLog.AddLog(u8"字体载入失败，异常退出。");
                         GlobalLog.AddLog_CurTime(false);
-                        GlobalLog.AddLog("遇到这种情况请重启几次，感谢你的支持。");
+                        GlobalLog.AddLog(u8"遇到这种情况请重启几次，感谢你的支持。");
                         GlobalLog.AddLog_CurTime(false);
-                        GlobalLog.AddLog("如果仍然不管用请联系作者。");
+                        GlobalLog.AddLog(u8"如果仍然不管用请联系作者。");
                     }
                     MessageBoxA(nullptr, "font->ContainerAtlas == NULL", "字体载入失败！", MB_ICONERROR);
                     MessageBoxA(nullptr, "遇到这种情况请重启几次", "程序启动失败！", MB_ICONERROR);
@@ -287,7 +290,7 @@ namespace PreLink
             if (EnableLog)
             {
                 GlobalLog.AddLog_CurTime(false);
-                GlobalLog.AddLog("主循环异常，异常信息：");
+                GlobalLog.AddLog(u8"主循环异常，异常信息：");
                 GlobalLog.AddLog_CurTime(false);
                 GlobalLog.AddLog(e.what());
             }
@@ -295,7 +298,7 @@ namespace PreLink
         if (EnableLog)
         {
             GlobalLog.AddLog_CurTime(false);
-            GlobalLog.AddLog("主循环停止工作。");
+            GlobalLog.AddLog(u8"主循环停止工作。");
         }
         
     }
