@@ -165,7 +165,7 @@ namespace ETimer
 		{
 			if (Mode == T_COUNTDOWN)
 			{
-				return ((inttime_t)((double)GetClock().count() - (double)Length.count()) <= 0);
+				return ((inttime_t)((double)GetClock().count()) <= 0);
 			}
 			else return false;
 		}

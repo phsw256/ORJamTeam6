@@ -96,15 +96,9 @@ void ORStage_MusicPlayer::DrawUI()
     {
         WorkSpace.TopBar.ForceChangeStage(u8"选项");
     }
-    for (size_t i = 0; i < std::size(Blink); i++)
-    {
-        if (Blink[i].Available())
-        {
-            //if (!Blink[i].IsPlaying())Blink[i].Play();
-            Blink[i].Draw();
-        }
-    }
-    WorkSpace.ImagePool.GetResource("MISSING")->Draw();
+    //for (size_t i = 0; i < std::size(Blink); i++)
+    //   if (Blink[i].Available())
+    //        Blink[i].Draw();
 }
 void ORStage_MusicPlayer::EventLoop()
 {
@@ -185,6 +179,7 @@ Stage_MainMenu::Stage_MainMenu(const _UTF8 std::string_view StageName) : ORStage
 void Stage_ShellSelect::DrawUI()
 {
     auto helper = PosSetHelper(WindowRelPos({ 0.4F,0.4F }));
+    /*
     if (ImGui::RadioButton(u8"天灾模式", Setting.MMPMode))Setting.MMPMode = !Setting.MMPMode;
     helper.SetX();
     if (ImGui::Button(u8"开始！"))
@@ -192,7 +187,11 @@ void Stage_ShellSelect::DrawUI()
         auto pGame = WorkSpace.TopBar.GetStage_Typed<Stage_MainGame>(u8"游戏");
         if (pGame)pGame->InitRules(Setting);
         WorkSpace.TopBar.ForceChangeStage(u8"游戏");
-    }helper.SetX();
+    }
+    */
+    ImGui::Text(u8"浙江大学重建后将会开放");
+
+    helper.SetX();
     if (ImGui::Button(u8"返回"))
     {
         WorkSpace.TopBar.ForceChangeStage(u8"主菜单");
@@ -213,15 +212,16 @@ Stage_ShellSelect::Stage_ShellSelect(const _UTF8 std::string_view StageName) : O
 
 void Stage_Setting::DrawUI()
 {
-    ImGui::Text(u8"设置！");
+    auto helper = PosSetHelper(WindowRelPos({ 0.4F,0.4F }));
+    ImGui::Text(u8"设置！"); helper.SetX();
     if (ImGui::Button(u8"返回"))
     {
         if(ToMainMenu)
             WorkSpace.TopBar.ForceChangeStage(u8"主菜单");
         else
             WorkSpace.TopBar.ForceChangeStage(u8"游戏选项");
-    }
-    if (ImGui::Button(u8"背景音乐"))
+    }helper.SetX();
+    if (ImGui::Button(u8"BGM设置"))
     {
         WorkSpace.TopBar.ForceChangeStage(u8"播放器");
     }
@@ -246,7 +246,17 @@ void Stage_Setting::SwitchInMenu()
 {
     ToMainMenu = true;
 }
-
+void Stage_MainGame::DrawUI_Cache()
+{
+    PosSetHelper helper(WindowRelPos({ 0.3F,0.06F }));
+    ImGui::BeginChildFrame(114517, WindowRelPos({ 0.7F,0.18F }), ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground);
+    ImGui::TextWrapped(u8"剩余行动力：%.2lf  剩余回合金：%.2lf", Cache.RestStr, Cache.Value.Reward.AddMon);
+    ImGui::TextWrapped(u8"体质：%.1lf 科技：%.1lf 文化：%.1lf ",
+        Cache.Value.Reward.ActQua(), Cache.Value.Reward.ActTec(), Cache.Value.Reward.ActCul());
+    ImGui::TextWrapped(u8"魅力：%.1lf 行动：%.1lf 精神：%.1lf ",
+        Cache.Value.Reward.ActAtt(), Cache.Value.Reward.ActStr(), Cache.Value.Reward.ActSpi());
+    ImGui::EndChildFrame();
+}
 void Stage_MainGame::DrawUI_IsoMap()
 {
     auto& Set = TileMap.GetDrawSetting();
@@ -262,10 +272,13 @@ void Stage_MainGame::DrawUI_IsoMap()
     InvisibleArrow("3"); ImGui::SameLine();
     if (ImGui::ArrowButton("DOWN", ImGuiDir_Down))TileMap.MoveView({ 0.2F,0.2F });
     TileMap.DrawUI();
+    ImGui::GetForegroundDrawList()->AddRectFilled(WindowRelPos({ 0.32F,0.77F }), WindowRelPos({ 0.66F,0.86F }), 0xFF000000, 6.0F);
+    ImGui::GetForegroundDrawList()->AddText(NULL, (float)FontHeight * 2, WindowRelPos({ 0.35F,0.77F }), 0xFFFFFFFF, u8"浙 江 大 学 遗 址");
 }
 
 void Stage_MainGame::DrawUI_RoundAction()
 {
+    /*
     if (Rules->Setting.MMPMode)
     {
         ImGui::TextWrapped(u8"天灾来辣！你似辣！");
@@ -274,6 +287,8 @@ void Stage_MainGame::DrawUI_RoundAction()
     {
         ImGui::TextWrapped(u8"天灾没来！你也似辣！");
     }
+    */
+    ImGui::TextWrapped(u8"你似辣！");
     if (Rules->ITeachYouHowToPlayThisFuckingGame)
     {
         ImGui::TextWrapped(u8"正在教程关里面爬行……");
@@ -297,6 +312,7 @@ void Stage_MainGame::DrawUI_RoundAction()
         Cache.CalcResult(*Tree);
     }
     DrawUI_IsoMap();
+    DrawUI_Cache();
 }
 
 void Stage_MainGame::DrawUI_RoundBegin()
@@ -310,6 +326,8 @@ void Stage_MainGame::DrawUI_RoundBegin()
         ImGui::TextWrapped(u8"回合 : %d", Cache.RoundCount);
         helper.SetX();
         ImGui::TextWrapped(u8"时代 : %s", pEra->Name.Name.c_str());
+        helper.SetX();
+        ImGui::TextWrapped(u8"一场超级灾难毁灭了浙江大学。\n在剧变当中新手指引已经几乎散佚。");
     }
     else
     {
@@ -331,8 +349,14 @@ void Stage_MainGame::DrawUI_RoundEnd()
 }
 void Stage_MainGame::DrawUI_RoundLast()
 {
-    Uninit();
-    WorkSpace.TopBar.ForceChangeStage(u8"主菜单");
+    auto helper = PosSetHelper(WindowRelPos({ 0.3F,0.3F }));
+    ImGui::Text(u8"恭喜你考上了浙江大学！\n过上了一边重建学校一边上学的日子\n半夜里，竺校长托梦说，\n如果你给了好评，考试就不会挂科。");
+    helper.SetX();
+    if (ImGui::Button(u8"返回主菜单"))
+    {
+        Uninit();
+        WorkSpace.TopBar.ForceChangeStage(u8"主菜单");
+    }
 }
 
 
@@ -501,7 +525,10 @@ void Stage_TechTree::DrawUI()
     if (ImGui::ArrowButton("RIGHT", ImGuiDir_Right))pt->GetMap().MoveView({ 0.4F,0.0F });
     //InvisibleArrow("3"); ImGui::SameLine();
     //if (ImGui::ArrowButton("DOWN", ImGuiDir_Down))pt->GetMap().MoveView({ 0.2F,0.2F });
+    Desc.Clear();
     pt->DrawUI();
+    Desc.DrawUI();
+    Main->DrawUI_Cache();
 }
 void Stage_TechTree::Init()
 {
@@ -521,9 +548,12 @@ void Stage_TechTree::Init()
         GlobalLog.AddLog(e.what());
         glfwSetWindowShouldClose(PreLink::window, 1);
     }
+    Desc.Resize(WindowRelPos({ 0.2F,0.7F }), WindowRelPos({ 0.6F,0.3F }));
     for (auto& op : Opts)
     {
-        auto& Set = op.pTree->GetMap().GetDrawSetting();
+        op.pTree->pCache = &Main->GetCache();
+        Main->GetCache().pDsc = &Desc;
+        op.pTree->ID = op.Name;
     }
 }
 void Stage_TechTree::EventLoop()
@@ -587,6 +617,8 @@ namespace ORTest
             glfwSetWindowShouldClose(PreLink::window, 1);
         }
         WorkSpace.MissingImage = WorkSpace.ImagePool.GetResource("MISSING");
+        WorkSpace.LockImage = WorkSpace.ImagePool.GetResource("LOCK");
+        WorkSpace.TickImage = WorkSpace.ImagePool.GetResource("TICK");
         try {
             ORJsonSource ImageSrc;
             ImageSrc.ParseFromFile(".\\Resources\\Anim.json");

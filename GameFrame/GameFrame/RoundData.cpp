@@ -42,29 +42,29 @@ double RewardValue::operator[](size_t Idx) const
 {
     return ((double*)this)[Idx];
 }
-double RewardValue::ActQua() const
+double RewardValue::ActQua(double EncFix) const
 {
-    return Actual(SupQua, BasQua, CorQua, EncQua, ActSpi(), 1);
+    return Actual(SupQua, BasQua, CorQua, EncQua + EncFix, ActSpi(), 1);
 }
-double RewardValue::ActTec() const
+double RewardValue::ActTec(double EncFix) const
 {
-    return Actual(SupTec, BasTec, CorTec, EncTec, ActSpi(), 1);
+    return Actual(SupTec, BasTec, CorTec, EncTec + EncFix, ActSpi(), 1);
 }
-double RewardValue::ActCul() const
+double RewardValue::ActCul(double EncFix) const
 {
-    return Actual(SupCul, BasCul, CorCul, EncCul, ActSpi(), 1);
+    return Actual(SupCul, BasCul, CorCul, EncCul + EncFix, ActSpi(), 1);
 }
-double RewardValue::ActAtt() const
+double RewardValue::ActAtt(double EncFix) const
 {
-    return Actual(SupAtt, BasAtt, CorAtt, EncAtt, ActSpi(), 1);
+    return Actual(SupAtt, BasAtt, CorAtt, EncAtt + EncFix, ActSpi(), 1);
 }
-double RewardValue::ActStr() const
+double RewardValue::ActStr(double EncFix) const
 {
-    return Actual(SupStr, BasStr, CorStr, EncStr, ActSpi(), 1);
+    return Actual(SupStr, BasStr, CorStr, EncStr + EncFix, ActSpi(), 1);
 }
-double RewardValue::ActSpi() const
+double RewardValue::ActSpi(double EncFix) const
 {
-    return Actual(SupSpi, BasSpi, CorSpi, EncSpi, 1, 1);
+    return Actual(SupSpi, BasSpi, CorSpi, EncSpi + EncFix, 100, 1);
 }
 std::valarray<double> RewardValue::GetAct() const
 {
@@ -144,15 +144,18 @@ ORLoadable_DefineLoaderOuter(PropValue)
     Obj("Reward", Reward);
 }
 
-void TechTreeNode::DrawAt(ImDrawList& List, ImVec2 ScreenPos, const ORDrawPosition& Pos)
+void TechTreeNode::DrawAt(ImDrawList& List, const ORDrawPosition& Pos)
 {
     if (Image)
     {
-        ScreenPos.y += Pos.ZDrawOffset;
-        Image->DrawAt(List, ScreenPos);
+        ScrPos.y += Pos.ZDrawOffset;
+        Image->DrawAt(List, ScrPos);
         ImGui::PushStyleColor(ImGuiCol_Text, pTree->TextCol.Value);
-        List.AddText(Image->GetDeltaRect().GetBL() + ScreenPos + ImVec2{ FontHeight * 1.5F, FontHeight * 0.25F }, pTree->TextCol, Name.Name.c_str());
+        List.AddText(Image->GetDeltaRect().GetBL() + ScrPos + ImVec2{ FontHeight * 1.5F, FontHeight * 0.25F }, pTree->TextCol, Name.Name.c_str());
         ImGui::PopStyleColor();
+        if (!Enabled)WorkSpace.LockImage->DrawAt(List, ScrPos);
+        if (Complete())WorkSpace.TickImage->DrawAt(List, ScrPos);
+        ScrPos.y -= Pos.ZDrawOffset;
     }
 }
 
@@ -162,11 +165,75 @@ void TechTreeNode::OnHover()
     ImGui::PushStyleColor(ImGuiCol_Text, pTree->HintTextCol.Value);
     ImGui::SetTooltip(Name.Hint.c_str());
     ImGui::PopStyleColor(2);
+    pTree->pCache->pDsc->SetDesc(Name.Desc);
+}
+
+NodeCache& TechTreeNode::GetCache()
+{
+    return pTree->pCache->Cache[pTree->ID + ID];
+}
+
+void TechTreeNode::UpdateTileAlways(ImDrawList& List)
+{
+    Enabled = true;
+    for (auto& s : Prerequisite)
+    {
+        auto p = pTree->GetNode(s);
+        if (p)
+        {
+            if (p->Complete())
+            {
+                List.AddLine(p->ScrPos + p->DeltaRect().GetCenter(), ScrPos + DeltaRect().GetCenter(), pTree->TextCol, 4.0F);
+            }
+            else
+            {
+                Enabled = false;
+                auto W = pTree->TextCol.Value.w;
+                pTree->TextCol.Value.w *= 0.2F;
+                List.AddLine(p->ScrPos + p->DeltaRect().GetCenter(), ScrPos + DeltaRect().GetCenter(), pTree->TextCol, 4.0F);
+                pTree->TextCol.Value.w = W;
+            }
+        }
+    }
 }
 
 void TechTreeNode::OnClick()
 {
+    if (!Enabled)return;
+    std::unique_ptr<ORPopUp> ppop{ new ORPopUp() };
+    ppop->CreateModal(Name.Name, true)
+        .SetFlag(ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize)
+        .SetPos(WindowRelPos({ 0.25F,0.25F }))
+        .SetSize({ ImGui::GetWindowWidth() / 2,ImGui::GetWindowHeight() / 2 })
+        .PushMsgBack([this]()
+            {
+                ImGui::SetWindowSize({ FontHeight * 20.0f,ImGui::GetWindowHeight()});
+                ImGui::TextWrapped(u8"投入行动力：");
+                int OriInput = GetCache().StrInput;
+                int& Input = GetCache().StrInput;
+                ImGui::InputInt((u8"##" + ID).c_str(), &GetCache().StrInput);
+                while (StrToProgress(Input - 1) + Progress - Value.Input > 0)Input--;
+                pTree->pCache->RestStr += OriInput - GetCache().StrInput;
+                ImGui::TextWrapped(u8"折合进度：%.2lf 当前进度：%.2lf 总进度：%.2lf",
+                    StrToProgress(GetCache().StrInput), StrToProgress(GetCache().StrInput) + Progress, Value.Input);
+                if (pTree->pCache->RestStr < 0)
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1,0,0,1 });
+                    ImGui::TextWrapped(u8"警告：您已透支 %.2lf 点行动力，可能导致精神力大幅下降！", pTree->pCache->RestStr);
+                    ImGui::PopStyleColor();
+                }
+                else
+                {
+                    ImGui::TextWrapped(u8"您还剩余 %.2lf 点行动力。", pTree->pCache->RestStr);
+                }
+            });
+    WorkSpace.PopUpManager.SetCurrentPopup(std::move(ppop));
+}
 
+double TechTreeNode::StrToProgress(double ActualStr)
+{
+    auto& v = pTree->pCache->Value.Reward;
+    return Actual(v.SupStr, ActualStr, v.CorStr, v.EncStr + pTree->pCache->Value.Reward.ActQua() - Value.Need, v.ActSpi(), 1);
 }
 
 void subreplace(std::string& dst_str, const std::string& sub_str, const std::string& new_str)
@@ -208,6 +275,7 @@ ORLoadable_DefineLoaderOuter(TechTree)
             p.second->Position.y += p.second->pEra->MapOffset.y;
         }
         p.second->pTree = this;
+        p.second->ID = p.first;
         NodeMap.Insert(p.second->Position, p.second);
     }
 }
@@ -230,6 +298,13 @@ EraData* TechTree::AtEra(int Round)
     return nullptr;
 }
 
+TechTreeNode* TechTree::GetNode(const std::string_view ID)
+{
+    auto it = Nodes.find(std::string(ID));
+    if (it != Nodes.end())return it->second.get();
+    else return nullptr;
+}
+
 void RoundCache::Init(RulesClass& Rule)
 {
     CurrentStage = Stage::Begin;
@@ -246,10 +321,10 @@ void RoundCache::Init(RulesClass& Rule)
     BeginAnim.Reset(WorkSpace.AnimPool.GetResource("Blink2"));
     BeginAnim.Play();
 }
-void RoundCache::NextRound(Stage_TechTree& Stage)
+void RoundCache::NextRound(Stage_TechTree& TT)
 {
     ++RoundCount;
-    auto pEra = Stage.AtEra(RoundCount);
+    auto pEra = TT.AtEra(RoundCount);
     if (!pEra)
     {
         CurrentStage = Stage::Last;
@@ -258,7 +333,6 @@ void RoundCache::NextRound(Stage_TechTree& Stage)
     {
         CurrentStage = Stage::Begin;
     }
-
     Value.Reward.BasStr += Value.Reward.IncStr;
     Value.Reward.BasSpi += Value.Reward.IncSpi;
     if (RestStr >= 0)Value.Reward.BasSpi += std::min(10.0, RestStr / 100);
@@ -271,7 +345,20 @@ void RoundCache::EnterEventStage(Stage_TechTree&)
 {
     CurrentStage = Stage::Event;
 }
-void RoundCache::CalcResult(Stage_TechTree&)
+void RoundCache::CalcResult(Stage_TechTree& TT)
 {
+    for (auto& p : TT.GetSciTree().Nodes)
+    {
+        p.second->Progress += p.second->StrToProgress(p.second->GetCache().StrInput);
+    }
+    for (auto& p : TT.GetCulTree().Nodes)
+    {
+        p.second->Progress += p.second->StrToProgress(p.second->GetCache().StrInput);
+    }
+    for (auto& p : TT.GetBodyTree().Nodes)
+    {
+        p.second->Progress += p.second->StrToProgress(p.second->GetCache().StrInput);
+    }
     CurrentStage = Stage::Result;
+    Cache.clear();
 }

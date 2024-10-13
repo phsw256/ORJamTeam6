@@ -1,7 +1,7 @@
 {
     "Body_TechTree": {
-        "InitialPos": [ 0, 0 ],
-        "SizeRatio": [ 300, 300 ],
+        "InitialPos": [ -0.3, -0.3 ],
+        "SizeRatio": [ 200, 160 ],
         "BgColor": { "RGBA": [ 255, 255, 255, 200 ] },
         "TextColor": { "KA": [ 0, 255 ] },
         "HintBgColor": { "KA": [ 255, 255 ] },
@@ -51,7 +51,7 @@
                     "Description": "从水下的第一个生命的萌芽开始……我们必须相信单细胞生物一开始是爬着走的。",
                     "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:无;\n尤里卡2:无;\n尤里卡3:无;"
                 },
-                "Image": "1", //如果无效自动调用MISSING
+                "Image": "Tile4", //如果无效自动调用MISSING
                 "Era": "E1",
                 "EffectValue": {
                     "Need": 0,
@@ -86,12 +86,326 @@
                 },
                 "RelativePos": {
                     "X": 1,
-                    "Y": 1,
+                    "Y": 0,
                     "ZOrder": 0,
                     "ZOffset": 0
                 },
                 "Unlock": [ "ZouLu" ],
                 "Prereq": [ "A" ]
+            },
+
+            "C": {
+                "NameGroup": {
+                    "Name": "跑步",
+                    "Description": "在与野兽的斗争中，跑步绝对是不可少的。。",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:学会走路;\n尤里卡2:精神值达到120%;\n尤里卡3:无;"
+                },
+                "Image": "Tile1",
+                "Era": "E2",
+                "EffectValue": {
+                    "Need": 15,
+                    "Input": 300,
+                    "reward": {
+                        "BasQua": 10
+                    }
+                },
+                "RelativePos": {
+                    "X": 2.5,
+                    "Y": 0,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [ "PaoBu" ],
+                "Prereq": [ "B" ]
+            },
+            "D": {
+                "NameGroup": {
+                    "Name": "跳绳",
+                    "Description": "人们终于会发现，藤曼不只是拿来捆绑……",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:文化树：音乐本能;\n尤里卡2:无;\n尤里卡3:无;"
+                },
+                "Image": "Tile1",
+                "Era": "E2",
+                "EffectValue": {
+                    "Need": 20,
+                    "Input": 300,
+                    "reward": {
+                        "BasQua": 10
+                    }
+                },
+                "RelativePos": {
+                    "X": 2,
+                    "Y": 1,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [ "TiaoShen" ],
+                "Prereq": [ "A" ]
+            },
+            "E": {
+                "NameGroup": {
+                    "Name": "篮球",
+                    "Description": "嗯，看上去它不需要练习两年半。",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:体质值达到25;\n尤里卡2:体质值达到25;\n尤里卡3:无;"
+                },
+                "Image": "Tile1",
+                "Era": "E2",
+                "EffectValue": {
+                    "Need": 30,
+                    "Input": 300,
+                    "reward": {
+                        "BasQua": 10
+                    }
+                },
+                "RelativePos": {
+                    "X": 3,
+                    "Y": 1,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [ "LanQiu" ],
+                "Prereq": [ "A" ]
+            },
+            "F": {
+                "NameGroup": {
+                    "Name": "羽毛球",
+                    "Description": "想要步入高级社会的必备运动之一",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:体质值达到25;\n尤里卡2:一回合获得20体质值;\n尤里卡3:无;"
+                },
+                "Image": "Tile1",
+                "Era": "E2",
+                "EffectValue": {
+                    "Need": 30,
+                    "Input": 300,
+                    "reward": {
+                        "BasQua": 10
+                    }
+                },
+                "RelativePos": {
+                    "X": 3,
+                    "Y": 2,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [ "YuMaoQiu" ],
+                "Prereq": [ "A" ]
+            },
+            "G": {
+                "NameGroup": {
+                    "Name": "自行车",
+                    "Description": "这绝对是正版的极限国度！",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:体质值达到25;\n尤里卡2:学会走路;\n尤里卡3:学会跑步;"
+                },
+                "Image": "Tile1",
+                "Era": "E2",
+                "EffectValue": {
+                    "Need": 30,
+                    "Input": 300,
+                    "reward": {
+                        "BasQua": 10
+                    }
+                },
+                "RelativePos": {
+                    "X": 4,
+                    "Y": 1,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [ "ZiXinChe" ],
+                "Prereq": [ "A" ]
+            },
+            "H": {
+                "NameGroup": {
+                    "Name": "小学体测",
+                    "Description": "卷体育得从娃娃抓起",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:学会三个小学时期科技;\n尤里卡2:无;\n尤里卡3:无;"
+                },
+                "Image": "Tile1",
+                "Era": "E2",
+                "EffectValue": {
+                    "Need": 40,
+                    "Input": 500,
+                    "reward": {
+                        "BasQua": 0
+                    }
+                },
+                "RelativePos": {
+                    "X": 3.5,
+                    "Y": 0,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [ "" ],
+                "Prereq": [ "C" ]
+            },
+            "I": {
+                "NameGroup": {
+                    "Name": "身体素质",
+                    "Description": "身体，是革命的本钱！",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:完成1次“短跑”;\n尤里卡2:完成1次“短跑”;\n尤里卡3:无;"
+                },
+                "Image": "Tile1",
+                "Era": "E3",
+                "EffectValue": {
+                    "Need": 50,
+                    "Input": 500,
+                    "reward": {
+                        "BasQua": 25
+                    }
+                },
+                "RelativePos": {
+                    "X": 5,
+                    "Y": 0,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [ "" ],
+                "Prereq": [ "C" ]
+            },
+
+            "J": {
+                "NameGroup": {
+                    "Name": "游泳",
+                    "Description": "到中流击水，浪遏飞舟！",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:体质值达到40;\n尤里卡2:无;\n尤里卡3:无;"
+                },
+                "Image": "Tile1",
+                "Era": "E3",
+                "EffectValue": {
+                    "Need": 50,
+                    "Input": 600,
+                    "reward": {
+                        "BasQua": 25
+                    }
+                },
+                "RelativePos": {
+                    "X": 6,
+                    "Y": 0,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [ "" ],
+                "Prereq": [ "C" ]
+            },
+            "K": {
+                "NameGroup": {
+                    "Name": "长跑",
+                    "Description": "到最后的才是赢家。",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:完成1次“短跑”;\n尤里卡2:无;\n尤里卡3:无;"
+                },
+                "Image": "Tile1",
+                "Era": "E3",
+                "EffectValue": {
+                    "Need": 100,
+                    "Input": 800,
+                    "reward": {
+                        "BasQua": 40
+                    }
+                },
+                "RelativePos": {
+                    "X": 5,
+                    "Y": 1,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [ "ChangPao", "MaLasong" ],
+                "Prereq": [ "C" ]
+            },
+            "L": {
+                "NameGroup": {
+                    "Name": "体育中考",
+                    "Description": "为了分数不惜赴汤蹈火",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:学会游泳;\n尤里卡2:完成1次“长跑”;\n尤里卡3:完成1次“长跑”;"
+                },
+                "Image": "Tile1",
+                "Era": "E3",
+                "EffectValue": {
+                    "Need": 100,
+                    "Input": 1000,
+                    "reward": {
+                        "BasQua": 0
+                    }
+                },
+                "RelativePos": {
+                    "X": 6,
+                    "Y": 1,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [],
+                "Prereq": [ "I" ]
+            },
+            "M": {
+                "NameGroup": {
+                    "Name": "引体向上",
+                    "Description": "他曾经是无数男人的噩梦……",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:无;\n尤里卡2:无;\n尤里卡3:无;"
+                },
+                "Image": "Tile1",
+                "Era": "E3",
+                "EffectValue": {
+                    "Need": 120,
+                    "Input": 2000,
+                    "reward": {
+                        "BasQua": 40
+                    }
+                },
+                "RelativePos": {
+                    "X": 7,
+                    "Y": 0,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [],
+                "Prereq": [ "I" ]
+            },
+            "N": {
+                "NameGroup": {
+                    "Name": "高中体测",
+                    "Description": "虽然不是考试分，但是他对于面子和择偶太重要了",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:完成2次“长跑”;\n尤里卡2:完成1次“马拉松”;\n尤里卡3:无;"
+                },
+                "Image": "Tile1",
+                "Era": "E3",
+                "EffectValue": {
+                    "Need": 120,
+                    "Input": 1000,
+                    "reward": {
+                        "BasQua": 0
+                    }
+                },
+                "RelativePos": {
+                    "X": 7,
+                    "Y": 1,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [],
+                "Prereq": [ "I" ]
+            },
+            "O": {
+                "NameGroup": {
+                    "Name": "健身",
+                    "Description": "男人需要muscle！",
+                    "Hint": "需要值:{Need};\n需要投入量:{Input};\n尤里卡1:体质值达到250;\n尤里卡2:学会引体向上;\n尤里卡3:学会高中体测;"
+                },
+                "Image": "Tile1",
+                "Era": "E3",
+                "EffectValue": {
+                    "Need": 150,
+                    "Input": 1000,
+                    "reward": {
+                        "BasQua": 10
+                    }
+                },
+                "RelativePos": {
+                    "X": 8,
+                    "Y": 1,
+                    "ZOrder": 0,
+                    "ZOffset": 0
+                },
+                "Unlock": [ "JianShen" ],
+                "Prereq": [ "I" ]
             }
         }
     },

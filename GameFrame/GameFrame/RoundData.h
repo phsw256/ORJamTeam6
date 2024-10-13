@@ -38,12 +38,12 @@ struct RewardValue
 
     double& operator[](size_t Idx);
     double operator[](size_t Idx) const;
-    double ActQua() const;
-    double ActTec() const;
-    double ActCul() const;
-    double ActAtt() const;
-    double ActStr() const;
-    double ActSpi() const;
+    double ActQua(double EncFix = 0) const;
+    double ActTec(double EncFix = 0) const;
+    double ActCul(double EncFix = 0) const;
+    double ActAtt(double EncFix = 0) const;
+    double ActStr(double EncFix = 0) const;
+    double ActSpi(double EncFix = 0) const;
     std::valarray<double> GetAct() const;
     std::valarray<double> GetBas() const;
     std::valarray<double> GetCor() const;
@@ -76,17 +76,27 @@ inline void BasicTypeLoad<ORDrawPosition>(ORJsonLoader& Obj, ORDrawPosition& Val
     Obj("X", Val.x, 0.0F)("Y", Val.y, 0.0F)("ZOrder", Val.ZOrder, 0.0F)("ZOffset", Val.ZDrawOffset, 0.0F);
 }
 
+struct NodeCache
+{
+    int StrInput;
+};
+
 class TechTree;
 class EraData;
 struct RulesClass;
 class Stage_TechTree;
+class RoundCache;
+class ORDescManager;
 class TechTreeNode :public ORDrawableTile
 {
 private:
+    bool Enabled{ false };
     HintedName Name;
     PropDelta Value;
-    double Progress{ 0 };
+    
 public:
+    double Progress{ 0 };
+    std::string ID;
     std::string EraName;
     EraData* pEra{ nullptr };
     TechTree* pTree{ nullptr };
@@ -94,13 +104,16 @@ public:
     std::vector<std::string> UnlockProgram;
     std::vector<std::string> Prerequisite;
 
-    virtual void DrawAt(ImDrawList& List, ImVec2 ScreenPos, const ORDrawPosition& Pos);
+    virtual void DrawAt(ImDrawList& List, const ORDrawPosition& Pos);
     virtual void OnHover();
     virtual void OnClick();
+    virtual void UpdateTileAlways(ImDrawList& List);
     TechTreeNode() :ORDrawableTile(NoInit{}) {}
     ORLoadable_DefineLoader;
     const std::string& GetName() const { return Name.Name; }
-
+    inline NodeCache& GetCache();
+    inline double StrToProgress(double ActualStr);
+    inline bool Complete() { return Progress > Value.Input - 0.0001; }
 };
 
 class EraData
@@ -112,24 +125,26 @@ public:
     ORLoadable_DefineLoader;
 };
 
+
+
 class TechTree
 {
     std::unordered_map<std::string, EraData> Eras;
     ORClickablePlainTileMap NodeMap;
-    std::unordered_map<std::string, ORResPtr<TechTreeNode>> Nodes;
 public:
+    std::unordered_map<std::string, ORResPtr<TechTreeNode>> Nodes;
     ImColor BgCol, TextCol, HintBgCol, HintTextCol;
+    RoundCache* pCache;
+    std::string ID;
 
     ORLoadable_DefineLoader;
     void DrawUI();
     ORClickablePlainTileMap& GetMap() { return NodeMap; }
     EraData* AtEra(int Round);
+    TechTreeNode* GetNode(const std::string_view ID);
 };
 
-struct NodeCache
-{
-    
-};
+
 
 
 class RoundCache
@@ -152,10 +167,10 @@ public:
     double RestStr;
     int RoundCount;
     ORAnim BeginAnim;
+    ORDescManager* pDsc;
+    std::unordered_map <std::string, NodeCache> Cache;
 
     RoundCache() :BeginAnim(NoInit{}),CurrentStage(Stage::First),RoundCount(0){}
-
-    std::unordered_map <std::string, NodeCache> Nodes;
 
     void Init(RulesClass&);
     void NextRound(Stage_TechTree&);

@@ -13,7 +13,7 @@
 ORDescManager Mg1;
 MusicMCI Ms1;
 
-const char* AppName= u8"INIä¯ÀÀÆ÷";
+const char* AppName= u8"MY ZJU";
 
 
 int ExitCloseAllFile();
@@ -49,7 +49,7 @@ void ControlPanel()
 
     ImGui::End();//*/
 
-    
+    WorkSpace.PopUpManager.DrawUI();
 
     /*
     static bool pp = true;

@@ -173,13 +173,13 @@
     <ClCompile Include="ORGameMap.cpp">
       <Filter>Util</Filter>
     </ClCompile>
-    <ClCompile Include="ORTest.cpp">
-      <Filter>头文件</Filter>
-    </ClCompile>
     <ClCompile Include="RoundData.cpp">
       <Filter>Util</Filter>
     </ClCompile>
     <ClCompile Include="ORAnimation.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="ORTest.cpp">
       <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>

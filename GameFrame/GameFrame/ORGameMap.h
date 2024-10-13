@@ -25,14 +25,17 @@ class ORDrawableTile
 protected:
     ORResPtr<ORImage> Image;
 public:
+    ImVec2 ScrPos;
+
     inline ORResPtr<ORImage>& GetImage() { return Image; }
     ORDrawableTile() = delete;
     ORDrawableTile(NoInit) {}
     ORDrawableTile(ORResPtr<ORImage> Img) :Image(Img) {}
     virtual ~ORDrawableTile() = default;
     virtual void DrawUI();
-    virtual void DrawAt(ImDrawList& List, ImVec2 ScreenPos, const ORDrawPosition& Pos);
-    virtual void UpdateTile() {}
+    virtual void DrawAt(ImDrawList& List, const ORDrawPosition& Pos);
+    virtual void UpdateTile(ImDrawList&) {}
+    virtual void UpdateTileAlways(ImDrawList&) {}
     virtual void OnClick() {}
     virtual void OnHover() {}
     inline ImRect DeltaRect() { return Image->GetDeltaRect(); }
@@ -123,33 +126,40 @@ void ORTileMap<TileTrait>::DrawUI()//With Update Tiles
 {
     if (!Setting.DrawTarget)return;
     Setting.DrawTarget->PushClipRect(Setting.DrawBorder.Min, Setting.DrawBorder.Max);
-    ImVec2 Cursor = ImGui::GetCursorPos();
     int i = 0;
     for (auto& p : Tiles)
+        p.second->ScrPos = TileTrait::DrawPosToScreen(Setting, p.first);
+    for (auto& p : Tiles)
+        p.second->UpdateTileAlways(*Setting.DrawTarget);
+    for (auto& p : Tiles)
     {
-        auto ScrPos = TileTrait::DrawPosToScreen(Setting, p.first);
         auto pImg = p.second->GetImage().get();
         if (!pImg)continue;
-        auto Rect = ImRect(ScrPos + pImg->GetDeltaMin(), ScrPos + pImg->GetDeltaMax());
-        if (ContainPart(Setting.ProcessBorder, Rect))
-            p.second->UpdateTile();
+        if (ContainPart(Setting.ProcessBorder, ImRect(p.second->ScrPos + pImg->GetDeltaMin(), p.second->ScrPos + pImg->GetDeltaMax())))
+            p.second->UpdateTile(*Setting.DrawTarget);
+    }
+    for (auto& p : Tiles)
+    {
+        auto pImg = p.second->GetImage().get();
+        if (!pImg)continue;
+        auto Rect = ImRect(p.second->ScrPos + pImg->GetDeltaMin(), p.second->ScrPos + pImg->GetDeltaMax());
         if (ContainPart(Setting.DrawBorder, Rect))
         {
-            p.second->DrawAt(*Setting.DrawTarget, ScrPos, p.first);
+            p.second->DrawAt(*Setting.DrawTarget, p.first);
             if constexpr (TileTrait::IsClickable)
             {
-                ImGui::SetCursorPos(Rect.Min);
-                ImGui::Dummy(pImg->GetSize());
-                if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
-                    p.second->OnClick();
-                if (ImGui::IsItemHovered())
-                    p.second->OnHover();
+                if (!ImGui::GetCurrentWindow()->SkipItems)
+                {
+                    ImGui::ItemSize(Rect.GetSize());
+                    ImGui::ItemAdd(Rect, 0);
+                }
+                if (ImGui::IsItemClicked(ImGuiMouseButton_Left))p.second->OnClick();
+                if (ImGui::IsItemHovered())p.second->OnHover();
             }
         }
-            
+        //Setting.DrawTarget->AddRect(Rect.Min, Rect.Max, ImColor(ImGui::GetStyleColorVec4(ImGuiCol_PopupBg)), 0.0F, 0, 4.0F);
     }
     Setting.DrawTarget->PopClipRect();
-    ImGui::SetCursorPos(Cursor);
 }
 
 template<typename TileTrait>

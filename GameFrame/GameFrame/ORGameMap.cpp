@@ -5,12 +5,13 @@ void ORDrawableTile::DrawUI()
 {
     if(Image)Image->Draw();
 }
-void ORDrawableTile::DrawAt(ImDrawList& List, ImVec2 ScreenPos, const ORDrawPosition& Pos)
+void ORDrawableTile::DrawAt(ImDrawList& List, const ORDrawPosition& Pos)
 {
     if (Image)
     {
-        ScreenPos.y += Pos.ZDrawOffset;
-        Image->DrawAt(List, ScreenPos);
+        ScrPos.y += Pos.ZDrawOffset;
+        Image->DrawAt(List, ScrPos);
+        ScrPos.y -= Pos.ZDrawOffset;
     }
 }
 ImVec2 RotateToScreenPos(ImVec2 Pos)

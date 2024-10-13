@@ -131,6 +131,7 @@ class Stage_TechTree : public ORStage
     TechTree BodyTechTree, CulTechTree, SciTechTree;
     Opt Opts[3] = { {&BodyTechTree, u8"体质"}, {&CulTechTree, u8"文化"}, {&SciTechTree, u8"科技"} };
     int CurOpt{ 0 };
+    ORDescManager Desc;
 public:
     TechTree& GetBodyTree() { return BodyTechTree; }
     TechTree& GetCulTree() { return CulTechTree; }
@@ -165,6 +166,10 @@ class Stage_MainGame : public ORStage
     void DrawUI_RoundEnd();
     void DrawUI_RoundLast();
 public:
+    inline RoundCache& GetCache() { return Cache; }
+
+    void DrawUI_Cache();
+
     virtual ~Stage_MainGame() = default;
     virtual void DrawUI();
     virtual void EventLoop();

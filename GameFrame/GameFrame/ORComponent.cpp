@@ -293,6 +293,11 @@ ORPopUp& ORPopUp::SetSize(ImVec2 NewSize)
     Size = NewSize;
     return *this;
 }
+ORPopUp& ORPopUp::SetPos(ImVec2 NewPos)
+{
+    Position = NewPos;
+    return *this;
+}
 
 
 ORPopUp::~ORPopUp()

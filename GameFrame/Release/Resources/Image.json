@@ -1,7 +1,19 @@
 {
     "Resources": {
-        "MISSING": {//Ӳ����ģ���Ҫ��
+        "MISSING": { //硬编码的，不要动
             "Path": ".\\Resources\\Image\\Missing.png"
+        },
+        "LOCK": { //硬编码的，不要动
+            "Path": ".\\Resources\\Image\\Lock.png",
+            "Centered": true
+        },
+        "TICK": { //硬编码的，不要动
+            "Path": ".\\Resources\\Image\\Tick.png",
+            "Centered": true
+        },
+        "001": {
+            "Path": ".\\Resources\\Image\\001.png",
+            "Centered": true
         },
         "Tile1": {
             "Path": ".\\Resources\\Image\\Tile1.png",

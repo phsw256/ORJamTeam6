@@ -298,6 +298,7 @@ struct ORPopUp : public ORComponentFrame
     ORPopUp& SetFlag(ImGuiWindowFlags flag);
     ORPopUp& UnsetFlag(ImGuiWindowFlags flag);
     ORPopUp& ClearFlag();
+    ORPopUp& SetPos(ImVec2 NewPos = { 0,0 });
     ORPopUp& SetSize(ImVec2 NewSize = { 0,0 });//{0,0}=default/auto
     ORPopUp& PushTextPrev(const _UTF8 std::string& Text);
     ORPopUp& PushTextBack(const _UTF8 std::string& Text);
@@ -403,6 +404,8 @@ public:
     ORResourcePool<ORImage> ImagePool;
     ORResourcePool<ORAnimType> AnimPool;
     ORResPtr<ORImage> MissingImage;
+    ORResPtr<ORImage> TickImage;
+    ORResPtr<ORImage> LockImage;
 
     ORWorkSpace() = default;
     ORWorkSpace(const ORWorkSpace&) = delete;

@@ -99,7 +99,7 @@ namespace PreLink
         if (!glfwInit())
             return 1;
         glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-        window = glfwCreateWindow(ScrX, ScrY, u8"INIä¯ÀÀÆ÷", FullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+        window = glfwCreateWindow(ScrX, ScrY, u8"ZJUÕ¨ÁË", FullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
         MainWindowHandle = glfwGetWin32Window(window);
         SetClassLong(MainWindowHandle, GCL_HICON, (LONG)LoadIcon(hInst, MAKEINTRESOURCE(IDI_ICON1)));
 
